@@ -1,14 +1,3 @@
-// const payload = {
-//     userId: '1234567890',
-// };
-// const options = {
-//     expiresIn: '1h'
-// };
-//
-// const token = jwt.sign(payload, secret, options);
-//
-// console.log(token);
-
 const ax = require('axios')
 //  配置项
 const cfg = require('../configs')
@@ -38,6 +27,7 @@ const login = async (req, res) => {
                 expiresIn: cfg.expriseIn_token
             })
             console.log('Bearer ' + token)
+            console.log('openid ' + openid)
             //  顺带从数据库里获取用户信息 直接返回给用户。
 
             res.send({

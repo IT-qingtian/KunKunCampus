@@ -24,9 +24,21 @@ export default {
   data() {
     return {}
   },
+  computed: {
+    ...mapState('store_user', ['token', 'subscribeMessages_templIDs']),
+  },
   methods: {
     ...mapMutations('store_user', ['updateToken']),
     login() {
+
+      //  获取通知权限
+      uni.requestSubscribeMessage({
+        tmplIds: this.subscribeMessages_templIDs,
+        success: (res) => {
+          console.log('==授权成功通知：', res)
+        },
+      })
+
       //  获取到用户信息
       uni.getUserInfo({
         success: (e) => {
@@ -36,6 +48,7 @@ export default {
             success: async (e) => {
               //  通过code给后端换取身份。
               const code = e.code
+              console.log(e, 'login')
               const resLogin = await uni.$httpRequest({
                 url: "my/login",
                 method: "post",
@@ -46,6 +59,7 @@ export default {
               const {code: resultCode, msg, data} = resLoginData
               if (resultCode) {
                 this.updateToken(data.token)
+                uni.$showMsg('登陆成功！')
               } else {
                 uni.$showMsg(`登陆失败 ${msg}`)
               }
@@ -73,8 +87,8 @@ export default {
 }
 
 .headImg {
-  width: 750 rpx;
-  height: 750 rpx;
+  width: 750rpx;
+  height: 750rpx;
   border-radius: 50%;
   overflow: hidden;
 }

@@ -1,8 +1,14 @@
 {
   "pages": [
     "pages/index/index",
-    "pages/order/order",
-    "pages/my/my"
+    "pages/order/index",
+    "pages/my/index",
+    "pages/fun_qiandao/index",
+    "pages/fun_hongbao/index",
+    "pages/fun_chaoshi/index",
+    "pages/fun_paotui/index",
+    "pages/fun_chuzuche/index",
+    "pages/fun_kuaidi/index"
   ],
   "subPackages": [],
   "window": {
@@ -21,13 +27,13 @@
         "selectedIconPath": "static/tab_icons/home_active.png"
       },
       {
-        "pagePath": "pages/order/order",
+        "pagePath": "pages/order/index",
         "text": "订单",
         "iconPath": "static/tab_icons/order.png",
         "selectedIconPath": "static/tab_icons/order_active.png"
       },
       {
-        "pagePath": "pages/my/my",
+        "pagePath": "pages/my/index",
         "text": "我的",
         "iconPath": "static/tab_icons/my.png",
         "selectedIconPath": "static/tab_icons/my_active.png"

@@ -1,10 +1,9 @@
 const express = require("express");
 //  配置项
 const cfg = require('./configs')
-const fs = require("fs");
-const WxPay = require("wechatpay-node-v3");
-//  用于生成token
-// const jwt = require('jsonwebtoken');
+
+
+//  解析token
 const {expressjwt: jwt} = require("express-jwt");
 
 
@@ -16,12 +15,6 @@ const {expressjwt: jwt} = require("express-jwt");
 // APIv3密码
 // vhB1mxBCeznKnDk8pUgmmEgBs8vVcoJl
 
-const pay = new WxPay({
-    appid: "wx312e2382a20cdbce",
-    mchid: "1635165643",
-    publicKey: fs.readFileSync("./apiclient_cert.pem"), // 公钥
-    privateKey: fs.readFileSync("./apiclient_key.pem"), // 秘钥
-});
 //  {async function payInfo(req, res) {
 //   const params = {
 //     description: "Asnull的支付测试", // 订单描述
@@ -67,9 +60,12 @@ app.use(express.json())
 
 //  产出解析token req.user
 app.use(jwt({
+    //  token密钥
     secret: cfg.secret_token,
+    //  加密方案
     algorithms: ["HS256"]
 }).unless({
+    //  需要排除的路径
     path: [
         /^\/my\/login(\/.+)*$/,
     ]
@@ -100,6 +96,9 @@ app.use("/my", router_my);
 const router_user = require("./router/user");
 app.use("/user", router_my);
 
+//  路由-快递
+const router_kd = require('./router/kuaidi')
+app.use("/kd", router_kd);
 
 app.listen(38000, () => {
     console.log("服务器启动成功。");

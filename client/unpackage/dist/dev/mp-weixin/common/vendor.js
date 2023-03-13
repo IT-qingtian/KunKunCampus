@@ -9584,42 +9584,35 @@ function normalizeComponent (
 
 
 /***/ }),
-/* 33 */,
-/* 34 */,
-/* 35 */,
-/* 36 */,
-/* 37 */,
-/* 38 */,
-/* 39 */,
-/* 40 */,
-/* 41 */,
-/* 42 */,
-/* 43 */,
-/* 44 */,
-/* 45 */,
-/* 46 */,
-/* 47 */,
-/* 48 */,
-/* 49 */,
-/* 50 */,
-/* 51 */,
-/* 52 */,
-/* 53 */,
-/* 54 */,
-/* 55 */,
-/* 56 */,
-/* 57 */,
-/* 58 */,
-/* 59 */,
-/* 60 */,
-/* 61 */,
-/* 62 */,
-/* 63 */,
-/* 64 */,
-/* 65 */,
-/* 66 */,
-/* 67 */,
-/* 68 */
+/* 33 */
+/*!****************************************!*\
+  !*** E:/桌面/坤坤校园/client/store/store.js ***!
+  \****************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+var _vue = _interopRequireDefault(__webpack_require__(/*! vue */ 25));
+var _vuex = _interopRequireDefault(__webpack_require__(/*! vuex */ 34));
+var _user = _interopRequireDefault(__webpack_require__(/*! @/store/user.js */ 35));
+_vue.default.use(_vuex.default);
+var store = new _vuex.default.Store({
+  modules: {
+    'store_user': _user.default
+  }
+});
+var _default = store;
+exports.default = _default;
+
+/***/ }),
+/* 34 */
 /*!**************************************************************************************!*\
   !*** ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vuex3/dist/vuex.common.js ***!
   \**************************************************************************************/
@@ -10875,60 +10868,7 @@ module.exports = index_cjs;
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../../../webpack/buildin/global.js */ 3)))
 
 /***/ }),
-/* 69 */
-/*!********************************************!*\
-  !*** E:/桌面/坤坤校园/client/configs/configs.js ***!
-  \********************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = {
-  serverAddress: 'http://localhost:38000/'
-};
-
-/***/ }),
-/* 70 */
-/*!************************************************************************************************!*\
-  !*** ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/@babel/runtime/regenerator/index.js ***!
-  \************************************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-// TODO(Babel 8): Remove this file.
-
-var runtime = __webpack_require__(/*! @babel/runtime/helpers/regeneratorRuntime */ 73)();
-module.exports = runtime;
-
-/***/ }),
-/* 71 */
-/*!****************************************!*\
-  !*** E:/桌面/坤坤校园/client/store/store.js ***!
-  \****************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-var _vue = _interopRequireDefault(__webpack_require__(/*! vue */ 25));
-var _vuex = _interopRequireDefault(__webpack_require__(/*! vuex */ 68));
-var _user = _interopRequireDefault(__webpack_require__(/*! @/store/user.js */ 72));
-_vue.default.use(_vuex.default);
-var store = new _vuex.default.Store({
-  modules: {
-    'store_user': _user.default
-  }
-});
-var _default = store;
-exports.default = _default;
-
-/***/ }),
-/* 72 */
+/* 35 */
 /*!***************************************!*\
   !*** E:/桌面/坤坤校园/client/store/user.js ***!
   \***************************************/
@@ -10945,11 +10885,28 @@ exports.default = void 0;
 var _default = {
   namespaced: true,
   state: {
-    token: uni.getStorageSync('token') || ''
+    //  用户token
+    token: uni.getStorageSync('token') || '',
+    //  测试用的信息
+    userInfo: {
+      name: "擎天大神",
+      lv: 100,
+      money: 999999
+    },
+    //  用户信息
+    // userInfo: {}
+    //  订阅消息id
+    subscribeMessages_templIDs: ['6noRpLYC3O78mFA8xMfT_hOnFmSasUsSMD6SX-rfyWQ']
   },
   mutations: {
+    //  更新token信息
     updateToken: function updateToken(state, tokenValue) {
+      state.token = tokenValue;
       uni.setStorageSync('token', tokenValue);
+    },
+    //  更新用户信息
+    updateUserInfo: function updateUserInfo(state, userInfo) {
+      state.userInfo = userInfo;
     }
   }
 };
@@ -10957,7 +10914,110 @@ exports.default = _default;
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))
 
 /***/ }),
-/* 73 */
+/* 36 */
+/*!********************************************!*\
+  !*** E:/桌面/坤坤校园/client/configs/configs.js ***!
+  \********************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = {
+  serverAddress: 'http://localhost:38000/'
+};
+
+/***/ }),
+/* 37 */,
+/* 38 */,
+/* 39 */,
+/* 40 */,
+/* 41 */,
+/* 42 */,
+/* 43 */,
+/* 44 */,
+/* 45 */,
+/* 46 */,
+/* 47 */,
+/* 48 */,
+/* 49 */,
+/* 50 */,
+/* 51 */,
+/* 52 */,
+/* 53 */,
+/* 54 */,
+/* 55 */,
+/* 56 */,
+/* 57 */,
+/* 58 */,
+/* 59 */,
+/* 60 */,
+/* 61 */,
+/* 62 */,
+/* 63 */,
+/* 64 */,
+/* 65 */,
+/* 66 */,
+/* 67 */,
+/* 68 */,
+/* 69 */,
+/* 70 */,
+/* 71 */,
+/* 72 */,
+/* 73 */,
+/* 74 */,
+/* 75 */,
+/* 76 */,
+/* 77 */,
+/* 78 */,
+/* 79 */,
+/* 80 */,
+/* 81 */,
+/* 82 */,
+/* 83 */,
+/* 84 */,
+/* 85 */,
+/* 86 */,
+/* 87 */,
+/* 88 */,
+/* 89 */,
+/* 90 */,
+/* 91 */,
+/* 92 */,
+/* 93 */,
+/* 94 */,
+/* 95 */,
+/* 96 */
+/*!********************************************!*\
+  !*** E:/桌面/坤坤校园/client/static/my/head.jpg ***!
+  \********************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = "/static/my/head.jpg";
+
+/***/ }),
+/* 97 */,
+/* 98 */,
+/* 99 */,
+/* 100 */,
+/* 101 */,
+/* 102 */,
+/* 103 */,
+/* 104 */,
+/* 105 */,
+/* 106 */
+/*!************************************************************************************************!*\
+  !*** ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/@babel/runtime/regenerator/index.js ***!
+  \************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+// TODO(Babel 8): Remove this file.
+
+var runtime = __webpack_require__(/*! @babel/runtime/helpers/regeneratorRuntime */ 107)();
+module.exports = runtime;
+
+/***/ }),
+/* 107 */
 /*!*******************************************************************!*\
   !*** ./node_modules/@babel/runtime/helpers/regeneratorRuntime.js ***!
   \*******************************************************************/
@@ -11278,7 +11338,7 @@ function _regeneratorRuntime() {
 module.exports = _regeneratorRuntime, module.exports.__esModule = true, module.exports["default"] = module.exports;
 
 /***/ }),
-/* 74 */
+/* 108 */
 /*!*****************************************************************!*\
   !*** ./node_modules/@babel/runtime/helpers/asyncToGenerator.js ***!
   \*****************************************************************/

@@ -28,8 +28,8 @@
   text-align: center;
 }
 .headImg {
-  width: 750 rpx;
-  height: 750 rpx;
+  width: 750rpx;
+  height: 750rpx;
   border-radius: 50%;
   overflow: hidden;
 }

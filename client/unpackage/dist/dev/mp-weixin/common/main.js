@@ -15,8 +15,8 @@ var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/run
 __webpack_require__(/*! uni-pages */ 26);
 var _vue = _interopRequireDefault(__webpack_require__(/*! vue */ 25));
 var _App = _interopRequireDefault(__webpack_require__(/*! ./App */ 27));
-var _store = _interopRequireDefault(__webpack_require__(/*! @/store/store.js */ 71));
-var _configs = _interopRequireDefault(__webpack_require__(/*! @/configs/configs.js */ 69));
+var _store = _interopRequireDefault(__webpack_require__(/*! @/store/store.js */ 33));
+var _configs = _interopRequireDefault(__webpack_require__(/*! @/configs/configs.js */ 36));
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
 // @ts-ignore
@@ -35,16 +35,18 @@ uni.$httpRequest = function (options) {
   uni.$showMsg('请求数据中……');
   //  发起请求那就提示弹框
   return new Promise(function (resolve, reject) {
-    uni.request({
-      url: _configs.default.serverAddress + options.url,
-      method: options.method,
-      data: options.data,
-      header: options.header,
+    //
+    if (!options.noBaseUrl) options.url = _configs.default.serverAddress + options.url;
+    uni.request(_objectSpread(_objectSpread({}, options), {}, {
+      // url: configs.serverAddress + options.url,
+      // method: options.method,
+      // data: options.data,
+      // header: options.header,
       success: function success(e) {
         resolve(e);
       },
       fail: reject
-    });
+    }));
   });
 };
 _vue.default.config.productionTip = false;

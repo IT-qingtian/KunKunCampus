@@ -4,7 +4,6 @@ import store from '@/store/store.js'
 //  引入配置项。
 import configs from '@/configs/configs.js'
 
-
 // 封装弹框的方法
 uni.$showMsg = function (title = '数据请求失败！', duration = 2000) {
     uni.showToast({
@@ -18,13 +17,15 @@ uni.$httpRequest = function (options) {
     uni.$showMsg('请求数据中……')
     //  发起请求那就提示弹框
     return new Promise((resolve, reject) => {
+        //
+        if (!options.noBaseUrl) options.url = configs.serverAddress + options.url
         uni.request({
-            url: configs.serverAddress + options.url,
-            method: options.method,
-            data: options.data,
-            header: options.header,
+            ...options,
+            // url: configs.serverAddress + options.url,
+            // method: options.method,
+            // data: options.data,
+            // header: options.header,
             success: (e) => {
-
                 resolve(e)
             },
             fail: reject
