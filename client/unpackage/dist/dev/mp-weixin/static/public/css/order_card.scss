@@ -1,0 +1,64 @@
+a {
+  color: red
+}
+
+//  订单卡片
+.card_order {
+  background-color: white;
+  border-radius: 5px;
+  margin: 6px;
+  padding: 5px;
+  box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.2);
+
+  .title {
+    font-weight: bold;
+    display: flex;
+
+    div {
+      flex: 1;
+    }
+
+    .state {
+      text-align: right;
+    }
+  }
+
+  .content {
+    display: flex;
+    //justify-content: space-between;
+    margin: 5px 0;
+
+    .left {
+      flex: 3;
+    }
+
+    .right {
+      flex: 7;
+
+      //  商品名
+      .goods_title {
+
+      }
+
+      .goods_describe {
+        font-weight: lighter;
+        color: grey;
+        height: 120rpx;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+  }
+
+  .footer {
+    text-align: right;
+
+    text {
+      display: inline-block;
+      padding: 6px;
+      border-radius: 20px;
+      border: 1px solid rgba(0, 0, 0, 0.4);
+      margin: 3px;
+    }
+  }
+}

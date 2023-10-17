@@ -1,0 +1,87 @@
+{
+    "pages": [
+        //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
+        {
+            "path": "pages/index/index",
+            "style": {
+                "navigationBarTitleText": "首页"
+            }
+        },
+        //    店铺端
+        {
+            "path": "pages/boss/shop_manage",
+            "style": {
+                "navigationBarTitleText": "店铺管理"
+            }
+        },
+        //   编辑商品
+        {
+            "path": "pages/boss/edit_goods",
+            "style": {
+                "navigationBarTitleText": "编辑商品"
+            }
+        },
+        {
+            "path": "pages/boss/login",
+            "style": {
+                "navigationBarTitleText": "商户端授权页面"
+            }
+        },
+        {
+            "path": "pages/boss/index",
+            "style": {
+                "navigationBarTitleText": "啊"
+            }
+        },
+        {
+            "path": "pages/boss/map",
+            "style": {
+                "navigationBarTitleText": "啊"
+            }
+        },
+        {
+            "path": "pages/boss/order",
+            "style": {
+                "navigationBarTitleText": "订单详情页"
+            }
+        },
+        {
+            "path": "pages/boss/balance",
+            "style": {
+                "navigationBarTitleText": "余额"
+            }
+        },
+        {
+            "path": "pages/boss/income",
+            "style": {
+                "navigationBarTitleText": "收益明细"
+            }
+        },
+        //    骑手端
+        {
+            "path": "pages/run/login",
+            "style": {
+                "navigationBarTitleText": "骑手端授权页面"
+            }
+        },
+        {
+            "path": "pages/run/index",
+            "style": {
+                "navigationBarTitleText": "首页"
+            }
+        },
+        {
+            "path": "pages/run/order_detail",
+            "style": {
+                "navigationBarTitleText": "订单详情页"
+            }
+        }
+    ],
+    "globalStyle": {
+        "navigationStyle": "custom",
+        "navigationBarTextStyle": "black",
+        "navigationBarTitleText": "uni-app",
+        "navigationBarBackgroundColor": "#F8F8F8",
+        "backgroundColor": "#F8F8F8"
+    }
+}

@@ -1,0 +1,26 @@
+<component name="libraryTable">
+  <library name="Generated files" type="javaScript">
+    <properties>
+      <sourceFilesUrls>
+        <item url="file://$PROJECT_DIR$/router/boss.js" />
+        <item url="file://$PROJECT_DIR$/router_hanlder/boss_manage.js" />
+        <item url="file://$PROJECT_DIR$/router_hanlder/boss_supermarket.js" />
+        <item url="file://$PROJECT_DIR$/router_hanlder/receving_order.js" />
+        <item url="file://$PROJECT_DIR$/router_hanlder/run/order/index.js" />
+        <item url="file://$PROJECT_DIR$/router_hanlder/run/user/index.js" />
+        <item url="file://$PROJECT_DIR$/router_hanlder/run_supermarket.js" />
+      </sourceFilesUrls>
+    </properties>
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/router/boss.js" />
+      <root url="file://$PROJECT_DIR$/router_hanlder/boss_manage.js" />
+      <root url="file://$PROJECT_DIR$/router_hanlder/boss_supermarket.js" />
+      <root url="file://$PROJECT_DIR$/router_hanlder/receving_order.js" />
+      <root url="file://$PROJECT_DIR$/router_hanlder/run/order/index.js" />
+      <root url="file://$PROJECT_DIR$/router_hanlder/run/user/index.js" />
+      <root url="file://$PROJECT_DIR$/router_hanlder/run_supermarket.js" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

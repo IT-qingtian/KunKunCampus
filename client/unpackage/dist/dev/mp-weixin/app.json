@@ -1,0 +1,49 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/order/index",
+    "pages/my/index",
+    "pages/fun_qiandao/index",
+    "pages/fun_hongbao/index",
+    "pages/fun_chaoshi/index",
+    "pages/fun_chaoshi/shop/index",
+    "pages/fun_chaoshi/comfirm/index",
+    "pages/fun_paotui/index",
+    "pages/fun_chuzuche/index",
+    "pages/fun_kuaidi/index",
+    "pages/fun_kuaidi_use_user/index",
+    "pages/fun_kuaidi_add_address/index",
+    "pages/appraise/index"
+  ],
+  "subPackages": [],
+  "window": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "坤坤校园",
+    "navigationBarBackgroundColor": "#F8F8F8",
+    "backgroundColor": "#F8F8F8"
+  },
+  "tabBar": {
+    "selectedColor": "#1396db",
+    "list": [
+      {
+        "text": "我的",
+        "pagePath": "pages/index/index",
+        "iconPath": "static/tab_icons/home.png",
+        "selectedIconPath": "static/tab_icons/home_active.png"
+      },
+      {
+        "pagePath": "pages/order/index",
+        "text": "订单",
+        "iconPath": "static/tab_icons/order.png",
+        "selectedIconPath": "static/tab_icons/order_active.png"
+      },
+      {
+        "pagePath": "pages/my/index",
+        "text": "我的",
+        "iconPath": "static/tab_icons/my.png",
+        "selectedIconPath": "static/tab_icons/my_active.png"
+      }
+    ]
+  },
+  "usingComponents": {}
+}

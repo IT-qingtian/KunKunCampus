@@ -1,0 +1,76 @@
+@charset "UTF-8";
+/* 行为相关颜色 */
+/* 文字基本颜色 */
+/* 背景颜色 */
+/* 边框颜色 */
+/* 尺寸变量 */
+/* 文字尺寸 */
+/* 图片尺寸 */
+/* Border Radius */
+/* 水平间距 */
+/* 垂直间距 */
+/* 透明度 */
+/* 文章场景相关 */
+.data-v-5e13bc42 uni-card ._div {
+  margin: 3px;
+}
+.shop_content.data-v-5e13bc42 {
+  display: flex;
+}
+.shop_content .left.data-v-5e13bc42 {
+  overflow: hidden;
+  flex: 3;
+}
+.shop_content .left image.data-v-5e13bc42 {
+  border-radius: 10px;
+  position: relative;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate(-50%, -50%);
+          transform: translate(-50%, -50%);
+  width: 95%;
+}
+.shop_content .right.data-v-5e13bc42 {
+  flex: 7;
+  color: black;
+}
+.shop_content .right .shop_title.data-v-5e13bc42 {
+  font-weight: bold;
+  font-size: 35rpx;
+  height: 50rpx;
+  line-height: 50rpx;
+}
+.shop_content .right .shop_info .score_info.data-v-5e13bc42 {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+.shop_content .right .shop_info .score_info .score.data-v-5e13bc42 {
+  font-weight: bold;
+  color: #e5574c;
+}
+.shop_content .right .shop_info .score_info .tags.data-v-5e13bc42 {
+  display: flex;
+}
+.shop_content .right .shop_info .score_info .tags .tag.data-v-5e13bc42 {
+  margin-right: 2px;
+}
+.shop_content .right .shop_info .score_info ._span.data-v-5e13bc42 {
+  margin-right: 5px;
+}
+.shop_content .right .shop_info .score_info .notice.data-v-5e13bc42 {
+  margin-top: 5px;
+  display: inline-block;
+  max-width: 370rpx;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 3px 5px;
+  background-color: #fdd98d;
+  color: #c64536;
+}
+.close_mark.data-v-5e13bc42 {
+  -webkit-filter: grayscale(1);
+          filter: grayscale(1);
+}
+

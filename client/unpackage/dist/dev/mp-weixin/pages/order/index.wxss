@@ -1,0 +1,41 @@
+@charset "UTF-8";
+/* 行为相关颜色 */
+/* 文字基本颜色 */
+/* 背景颜色 */
+/* 边框颜色 */
+/* 尺寸变量 */
+/* 文字尺寸 */
+/* 图片尺寸 */
+/* Border Radius */
+/* 水平间距 */
+/* 垂直间距 */
+/* 透明度 */
+/* 文章场景相关 */
+.container.data-v-0ca91b30 {
+  height: 100vh;
+  box-sizing: border-box;
+}
+.container .tab.data-v-0ca91b30 {
+  white-space: nowrap;
+}
+.container .tab .select.data-v-0ca91b30 {
+  border-bottom: 3px solid orange;
+  font-weight: bold;
+  color: orangered;
+}
+.container .tab .tab_item.data-v-0ca91b30 {
+  display: inline-block;
+  transition: color 0.4s;
+  font-size: 40rpx;
+  margin: 0 5px;
+}
+.container .content.data-v-0ca91b30 {
+  padding-top: 2px;
+  box-sizing: border-box;
+  display: flex;
+  height: calc(100% - 40rpx);
+}
+.container .content .content_children.data-v-0ca91b30 {
+  width: 100%;
+}
+

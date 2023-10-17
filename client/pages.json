@@ -1,0 +1,123 @@
+{
+  "easycom": {
+    "^u-(.*)": "uview-ui/components/u-$1/u-$1.vue"
+  },
+  "pages": [
+    {
+      "path": "pages/index/index",
+      "style": {
+        "navigationBarTitleText": "功能区"
+      }
+    },
+    {
+      "path": "pages/order/index",
+      "style": {
+        "enablePullDownRefresh": true,
+        "navigationBarTitleText": "订单记录"
+      }
+    },
+    {
+      "path": "pages/my/index",
+      "style": {
+        "navigationBarTitleText": "我的"
+      }
+    },
+    {
+      "path": "pages/fun_qiandao/index",
+      "style": {
+        "navigationBarTitleText": "签到"
+      }
+    },
+    {
+      "path": "pages/fun_hongbao/index",
+      "style": {
+        "navigationBarTitleText": "红包优惠"
+      }
+    },
+    {
+      "path": "pages/fun_chaoshi/index",
+      "style": {
+        "navigationBarTitleText": "外卖超市"
+      }
+    },
+    {
+      "path": "pages/fun_chaoshi/shop/index",
+      "style": {
+        "navigationBarTitleText": "店铺详情"
+      }
+    },
+    {
+      "path": "pages/fun_chaoshi/comfirm/index",
+      "style": {
+        "navigationBarTitleText": "确认订单"
+      }
+    },
+    {
+      "path": "pages/fun_paotui/index",
+      "style": {
+        "navigationBarTitleText": "代送"
+      }
+    },
+    {
+      "path": "pages/fun_chuzuche/index",
+      "style": {
+        "navigationBarTitleText": "出租车"
+      }
+    },
+    {
+      "path": "pages/fun_kuaidi/index",
+      "style": {
+        "navigationBarTitleText": "代取快递"
+      }
+    },
+    {
+      "path": "pages/fun_kuaidi_use_user/index",
+      "style": {
+        "navigationBarTitleText": "选择收件人",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/fun_kuaidi_add_address/index",
+      "style": {
+        "navigationBarTitleText": "添加地址"
+      }
+    },
+    {
+      "path": "pages/appraise/index",
+      "style": {
+        "navigationBarTitleText": "评论"
+      }
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "坤坤校园",
+    "navigationBarBackgroundColor": "#F8F8F8",
+    "backgroundColor": "#F8F8F8"
+  },
+  "uniIdRouter": {},
+  "tabBar": {
+    "selectedColor": "#1396db",
+    "list": [
+      {
+        "text": "我的",
+        "pagePath": "pages/index/index",
+        "iconPath": "static/tab_icons/home.png",
+        "selectedIconPath": "static/tab_icons/home_active.png"
+      },
+      {
+        "pagePath": "pages/order/index",
+        "text": "订单",
+        "iconPath": "static/tab_icons/order.png",
+        "selectedIconPath": "static/tab_icons/order_active.png"
+      },
+      {
+        "pagePath": "pages/my/index",
+        "text": "我的",
+        "iconPath": "static/tab_icons/my.png",
+        "selectedIconPath": "static/tab_icons/my_active.png"
+      }
+    ]
+  }
+}

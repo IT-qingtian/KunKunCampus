@@ -1,0 +1,32 @@
+.container {
+  //background-color: pink;
+  padding: 15px;
+  //  卡片
+  .card {
+    border: 1px solid rgb(182, 182, 182);
+    background-color: ghostwhite;
+    border-radius: 5px;
+    padding: 0 10px;
+    box-sizing: border-box;
+    //  每项
+    .card_item:first-child {
+      border-top: none;
+    }
+
+    .card_item {
+      display: flex;
+      border-top: 1px solid rgba(0, 0, 0, 0.2);
+      justify-content: space-between;
+
+      padding: 15px 0;
+
+      .left {
+        //font-weight: bold;
+      }
+
+      .right {
+        text-align: right;
+      }
+    }
+  }
+}

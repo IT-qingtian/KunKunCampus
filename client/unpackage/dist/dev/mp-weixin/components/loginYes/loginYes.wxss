@@ -1,0 +1,74 @@
+@charset "UTF-8";
+/* 行为相关颜色 */
+/* 文字基本颜色 */
+/* 背景颜色 */
+/* 边框颜色 */
+/* 尺寸变量 */
+/* 文字尺寸 */
+/* 图片尺寸 */
+/* Border Radius */
+/* 水平间距 */
+/* 垂直间距 */
+/* 透明度 */
+/* 文章场景相关 */
+.loginYes {
+  background: #1FA2FF;
+  /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(to right, #A6FFCB, #12D8FA, #1FA2FF);
+  /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+}
+.loginYes .top_ {
+  padding-top: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 325rpx;
+}
+.loginYes .top_ .box {
+  border-radius: 5px;
+  position: relative;
+  background-color: #fff;
+  height: 85%;
+  width: 95%;
+}
+.loginYes .top_ .box .top {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  -webkit-transform: translateY(-35%);
+          transform: translateY(-35%);
+}
+.loginYes .top_ .box .top .head {
+  margin-bottom: 5px;
+  border-radius: 50%;
+  width: 150rpx;
+  height: 150rpx;
+  box-shadow: 5px 5px 20px 0px #423f3f;
+}
+.loginYes .top_ .box .bottom {
+  background-color: red;
+}
+.loginYes .bottom_ {
+  padding-top: 15px;
+  background-color: white;
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+  overflow: hidden;
+}
+.loginYes .bottom_ .item {
+  padding: 10px 0;
+  margin: 0 15px;
+  border-top: 0.1px solid #8f8f94;
+  display: flex;
+}
+.loginYes .bottom_ .item .left {
+  flex: 1;
+  font-weight: bold;
+}
+.loginYes .bottom_ .item .rigth {
+  text-align: right;
+  flex: 1;
+}
+

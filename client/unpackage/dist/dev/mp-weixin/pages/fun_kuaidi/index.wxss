@@ -1,0 +1,201 @@
+@charset "UTF-8";
+/* 行为相关颜色 */
+/* 文字基本颜色 */
+/* 背景颜色 */
+/* 边框颜色 */
+/* 尺寸变量 */
+/* 文字尺寸 */
+/* 图片尺寸 */
+/* Border Radius */
+/* 水平间距 */
+/* 垂直间距 */
+/* 透明度 */
+/* 文章场景相关 */
+.loginYes {
+  background: #1FA2FF;
+  /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(to right, #A6FFCB, #12D8FA, #1FA2FF);
+  /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+}
+.loginYes .top_ {
+  padding-top: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 325rpx;
+}
+.loginYes .top_ .box {
+  border-radius: 5px;
+  position: relative;
+  background-color: #fff;
+  height: 85%;
+  width: 95%;
+}
+.loginYes .top_ .box .top {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  -webkit-transform: translateY(-35%);
+          transform: translateY(-35%);
+}
+.loginYes .top_ .box .top .head {
+  margin-bottom: 5px;
+  border-radius: 50%;
+  width: 150rpx;
+  height: 150rpx;
+  box-shadow: 5px 5px 20px 0px #423f3f;
+}
+.loginYes .top_ .box .bottom {
+  background-color: red;
+}
+.loginYes .bottom_ {
+  padding-top: 15px;
+  background-color: white;
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+  overflow: hidden;
+}
+.loginYes .bottom_ .item {
+  padding: 10px 0;
+  margin: 0 15px;
+  border-top: 0.1px solid #8f8f94;
+  display: flex;
+}
+.loginYes .bottom_ .item .left {
+  flex: 1;
+  font-weight: bold;
+}
+.loginYes .bottom_ .item .rigth {
+  text-align: right;
+  flex: 1;
+}
+
+@charset "UTF-8";
+/* 行为相关颜色 */
+/* 文字基本颜色 */
+/* 背景颜色 */
+/* 边框颜色 */
+/* 尺寸变量 */
+/* 文字尺寸 */
+/* 图片尺寸 */
+/* Border Radius */
+/* 水平间距 */
+/* 垂直间距 */
+/* 透明度 */
+/* 文章场景相关 */
+.main {
+  margin-top: 15px;
+  width: 90%;
+  left: 50%;
+  -webkit-transform: translateX(-50%);
+          transform: translateX(-50%);
+  position: absolute;
+  box-sizing: border-box;
+}
+.main .type {
+  font-size: 65 rpx;
+  display: flex;
+  justify-content: space-around;
+}
+.main .type text {
+  transition: all 0.5s;
+  color: #a9a6a7;
+}
+.main .type .active {
+  padding-bottom: 5px;
+  border-bottom: 5px solid #e9ea60;
+  color: black;
+  font-weight: bold;
+}
+.main .mode {
+  transition: all 0.5s;
+  position: relative;
+}
+.main .mode .type_1 {
+  transition: all 0.5s;
+}
+.main .mode .type_2 {
+  transition: all 0.5s;
+  width: 100%;
+  -webkit-transform: translateX(100%);
+          transform: translateX(100%);
+  position: absolute;
+  top: 0;
+}
+.main .mode_1 {
+  -webkit-transform: translateX(0);
+          transform: translateX(0);
+}
+.main .mode_1 .type_2 {
+  opacity: 0;
+}
+.main .mode_2 {
+  -webkit-transform: translateX(-100%);
+          transform: translateX(-100%);
+}
+.main .mode_2 .type_1 {
+  opacity: 0;
+}
+.card {
+  box-sizing: border-box;
+  box-shadow: 0 3px 10px 1px rgba(0, 0, 0, 0.5);
+  padding: 5px;
+  margin-bottom: 7px;
+  border-radius: 5px;
+  background-color: #f7f7f7;
+}
+.card .card_item {
+  border-top: 1px solid #726c6c;
+  display: flex;
+  padding: 5px;
+  justify-content: space-between;
+}
+.card .card_item .left {
+  font-weight: bold;
+}
+.card .card_item .right {
+  font-size: 12px;
+  color: #8f8f94;
+}
+.card .remarks {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 50%;
+}
+.card .deliver:before {
+  content: "送";
+  color: white;
+  display: inline-block;
+  text-align: center;
+  width: 50 rpx;
+  height: 50 rpx;
+  line-height: 50 rpx;
+  margin-right: 5px;
+  background-color: lawngreen;
+  border-radius: 50%;
+}
+.card .pay .left {
+  flex: 7;
+}
+.card .pay .right {
+  background-color: #fdc938;
+  text-align: center;
+  color: black;
+  font-size: 15px;
+  border-radius: 6px;
+  flex: 3;
+}
+.card .card_item:first-child {
+  border: none;
+}
+.bg .t {
+  width: 750 rpx;
+  height: 130px;
+  border-bottom-left-radius: 10%;
+  border-bottom-right-radius: 10%;
+  background-color: #fdc938;
+}
+

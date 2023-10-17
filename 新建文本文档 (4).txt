@@ -1,0 +1,20 @@
+获取code：
+https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx312e2382a20cdbce&redirect_uri=http://17xf.cq.cn&response_type=code&scope=snsapi_base&state=none#wechat_redirect
+
+登陆授权：
+http://localhost:5173/#/pages/boss/login?code=
+041BYm1w32KkJ037xC2w39TCFT0BYm10
+
+
+Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJvcGVuaWRfb2ZmaWNpYWwiOiJvWHRCczV1MUJKTnoyaUgtd3RpU25USWNVUTc4IiwiaWF0IjoxNjg1MDk5ODc4LCJleHAiOjIwNDUwOTYyNzh9.EdHQgNHeOA0GV67iKeQjoTCjg5YzJT4Zy4iepNpURmc
+
+超市-商家思路
+
+订单是否完成  
+-1 订单已退款。
+0未接单，
+1是已接单（处理中），
+2 等待配送
+3 配送中
+4 处理完毕（自提/配送完毕）
+5 用户确认完成。

@@ -1,0 +1,8 @@
+{
+  "navigationBarTitleText": "选择收件人",
+  "enablePullDownRefresh": true,
+  "usingComponents": {
+    "use_user_yes": "/components/use_user_yes/use_user_yes",
+    "use_user_no": "/components/use_user_no/use_user_no"
+  }
+}

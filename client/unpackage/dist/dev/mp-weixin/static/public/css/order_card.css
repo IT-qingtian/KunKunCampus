@@ -1,0 +1,50 @@
+a {
+  color: red;
+}
+
+.card_order {
+  background-color: white;
+  border-radius: 5px;
+  margin: 6px;
+  padding: 5px;
+  box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.2);
+}
+.card_order .title {
+  font-weight: bold;
+  display: flex;
+}
+.card_order .title div {
+  flex: 1;
+}
+.card_order .title .state {
+  text-align: right;
+}
+.card_order .content {
+  display: flex;
+  margin: 5px 0;
+}
+.card_order .content .left {
+  flex: 3;
+}
+.card_order .content .right {
+  flex: 7;
+}
+.card_order .content .right .goods_describe {
+  font-weight: lighter;
+  color: grey;
+  height: 120rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.card_order .footer {
+  text-align: right;
+}
+.card_order .footer text {
+  display: inline-block;
+  padding: 6px;
+  border-radius: 20px;
+  border: 1px solid rgba(0, 0, 0, 0.4);
+  margin: 3px;
+}
+
+/*# sourceMappingURL=order_card.css.map */
