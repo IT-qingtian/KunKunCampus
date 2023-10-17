@@ -44,5 +44,7 @@ router.post('/supermarket/change_delivery_state', change_delivery_state)
 router.post('/change_work_status', change_work_status)
 // 获取订单
 router.post('/get_orders', get_orders)
+// 接单
+// router.post('/receving_orders', receving)
 
 module.exports = router

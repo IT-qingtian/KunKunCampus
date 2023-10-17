@@ -7,7 +7,7 @@ const order = require('../function/order.js')
 // 骑手接单
 const receving = async (req, res) => {
     const {openid, body: params} = req
-    if (!openid) return sendErr(res, '无法校验身份请重新登录')
+    // if (!openid) return sendErr(res, '无法校验身份请重新登录')
     const {out_trade_no} = params
 
     //  订单数据
@@ -25,7 +25,7 @@ const receving = async (req, res) => {
         if (![1, 2].includes(order_over)) return sendErr(res, '接单失败，商家尚未接单或订单已完成。')
         if (data.take_goods_mode !== 0) return sendErr(res, '接单失败，非外派模式。')
         if (receving_order_info.is_merchant_dispatch) return sendErr(res, '接单失败，本订单为商家自配送。')
-        if (receving_order_info.delivery_info) return sendErr(res, '接单失败，本订单已被其他人接。')
+        if (receving_order_info.delivery_info) return sendErr(res, '接单失败，你来晚了，本订单已被别人接到了。')
     }
 
     // 变更接单信息
@@ -110,7 +110,7 @@ const change_delivery_state = async (req, res) => {
     // 根据目前状态来
     switch (order_over) {
         case 1:
-            return sendErr(res, '无法操作状态，商家尚未确认订单。')
+            return sendErr(res, '无法操作状态，商家尚未处理好订单。')
         case 4:
             return sendErr(res, '无法操作状态，订单已完成。')
         //  处理完毕，未开始配送

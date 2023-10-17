@@ -46,8 +46,6 @@ var receving = function (req, res) { return __awaiter(void 0, void 0, void 0, fu
         switch (_b.label) {
             case 0:
                 openid = req.openid, params = req.body;
-                if (!openid)
-                    return [2 /*return*/, (0, public_1.sendErr)(res, '无法校验身份请重新登录')];
                 out_trade_no = params.out_trade_no;
                 return [4 /*yield*/, order.queryOrder(out_trade_no)];
             case 1:
@@ -70,7 +68,7 @@ var receving = function (req, res) { return __awaiter(void 0, void 0, void 0, fu
                     if (receving_order_info.is_merchant_dispatch)
                         return [2 /*return*/, (0, public_1.sendErr)(res, '接单失败，本订单为商家自配送。')];
                     if (receving_order_info.delivery_info)
-                        return [2 /*return*/, (0, public_1.sendErr)(res, '接单失败，本订单已被其他人接。')];
+                        return [2 /*return*/, (0, public_1.sendErr)(res, '接单失败，你来晚了，本订单已被别人接到了。')];
                 }
                 // 变更接单信息
                 {
@@ -171,7 +169,7 @@ var change_delivery_state = function (req, res) { return __awaiter(void 0, void 
                 // 根据目前状态来
                 switch (order_over) {
                     case 1:
-                        return [2 /*return*/, (0, public_1.sendErr)(res, '无法操作状态，商家尚未确认订单。')];
+                        return [2 /*return*/, (0, public_1.sendErr)(res, '无法操作状态，商家尚未处理好订单。')];
                     case 4:
                         return [2 /*return*/, (0, public_1.sendErr)(res, '无法操作状态，订单已完成。')
                             //  处理完毕，未开始配送

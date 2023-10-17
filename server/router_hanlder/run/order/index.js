@@ -69,8 +69,18 @@ var get_orders = function (req, res) { return __awaiter(void 0, void 0, void 0, 
                 // 空数据造成错误
                 if (d_orders.eCode === 100 && !out_trade_no)
                     return [2 /*return*/, (0, public_js_1.sendRes)(res, [], '暂无订单')];
-                if (out_trade_no)
+                if (out_trade_no) {
+                    // 空数据
+                    if (!d_orders.code)
+                        return [2 /*return*/, (0, public_js_1.sendErr)(res, '无订单。')];
                     d_orders.data = d_orders.data[0];
+                    //    订单是否已接单
+                    console.log(d_orders);
+                    if (d_orders.data.receving_order_info.delivery_info) {
+                        //     已接单 验证是否是自己
+                        return [2 /*return*/, d_orders.data.receving_order_info.delivery_info.openid === openid ? (0, public_js_1.sendRes)(res, d_orders.data) : (0, public_js_1.sendErr)(res, '非本人接单，无权查看！')];
+                    }
+                }
                 (0, public_js_1.sendRes)(res, d_orders.data);
                 return [2 /*return*/];
         }
