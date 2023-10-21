@@ -18,11 +18,11 @@ const data = reactive({
 const change_work_status = async () => {
     // 改变状态
     data.change_work_loading = true
-    const r_change_work = await run_change_work_status(data.is_work_ing)
+    data.is_work_ing = !data.is_work_ing
+    const r_change_work = await run_change_work_status(!data.is_work_ing)
     data.change_work_loading = false
     // 错误，修改无效。
     if (!r_change_work.code) {
-        data.is_work_ing = !data.is_work_ing
         return uni.showToast({
             title: r_change_work.msg,
             icon: 'error',
@@ -30,7 +30,9 @@ const change_work_status = async () => {
     }
     data.is_work_ing = r_change_work.data.is_work_ing
 }
-
+const ranking = async () => {
+    uni.showToast({title: "别问，问就是还没做...", icon: "error"})
+}
 </script>
 
 <template>
@@ -60,7 +62,7 @@ const change_work_status = async () => {
                     <el-switch v-model="data.is_work_ing" :loading="data.change_work_loading"></el-switch>
                 </div>
             </div>
-            <div class="item">
+            <div class="item" @click="ranking">
                 <div class="key">
                     <i class="iconfont icon-paiming"></i>
                     <span class="describe">排行榜</span>

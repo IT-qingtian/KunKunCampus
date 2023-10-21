@@ -79,6 +79,7 @@ const receving_order = async (req, res) => {
             shop_info: {
                 openid,
                 shop_id,
+                // 商户接单时间
                 receving_time: formatTime()
             },
             is_merchant_dispatch

@@ -341,7 +341,7 @@ var _default = {
         this.order_state = '等待接单';
         break;
       case 1:
-        this.order_state = '订单处理中';
+        this.order_state = '商家处理中';
         break;
       case 2:
         this.order_state = '等待配送中';
@@ -350,7 +350,7 @@ var _default = {
         this.order_state = '骑手配送中';
         break;
       case 4:
-        this.order_state = this.data.data.take_goods_mode === 1 ? '请前往店铺自提' : '已配送完毕';
+        this.order_state = this.data.data.take_goods_mode === 1 ? '请前往店铺自提' : '配送已到达';
         break;
       case 5:
         this.order_state = '订单已完结';

@@ -49,7 +49,7 @@ const logon = (openid) => {
         const sql = `select * from users_run where openid='${openid}'`
         db.query(sql, (err, result) => {
             if (err) {
-                console.log('查询用户是否存在  出现问题', err.sqlMessage, sql)
+                console.log('查询用户是否存在  出现问题', err.sqlMessage, err, sql)
                 return resolve({code: 0, msg: err.sqlMessage})
             }
             //  有数据 可以直接返回

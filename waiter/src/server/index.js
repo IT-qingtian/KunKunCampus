@@ -119,7 +119,13 @@ const run_get_user_info = () => ax.post('/run/get_user_info');
 /*修改状态*/
 const run_change_work_status = (is_work_ing) => ax.post('/run/change_work_status', { is_work_ing });
 /*获取订单*/
-const run_get_orders = (out_trade_no) => ax.post('/run/get_orders', { out_trade_no });
+const run_get_orders = (out_trade_no, is_my) => ax.post('/run/get_orders', {
+    out_trade_no,
+    is_my
+});
+const run_receving_order = (out_trade_no) => ax.post('/run/supermarket/receving', { out_trade_no });
+/*更新订单状态*/
+const run_update_order_state = (out_trade_no) => ax.post('/run/supermarket/change_delivery_state', { out_trade_no });
 // 导出
-export { boss_login, run_login, boss_pull_order, boss_receving_order, boss_dispatch_order, boss_over_order, boss_add_goods, boss_get_goods, boss_add_group, boss_change_off_state, boss_update_goods_data, boss_delete_goods, boss_delete_group, boss_get_shop_info, boss_update_shop_data, run_get_user_info, run_change_work_status, run_get_orders };
+export { boss_login, run_login, boss_pull_order, boss_receving_order, boss_dispatch_order, boss_over_order, boss_add_goods, boss_get_goods, boss_add_group, boss_change_off_state, boss_update_goods_data, boss_delete_goods, boss_delete_group, boss_get_shop_info, boss_update_shop_data, run_get_user_info, run_change_work_status, run_get_orders, run_receving_order, run_update_order_state };
 //# sourceMappingURL=index.js.map

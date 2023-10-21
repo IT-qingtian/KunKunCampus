@@ -119,6 +119,7 @@ var receving_order = function (req, res) { return __awaiter(void 0, void 0, void
                     shop_info: {
                         openid: openid,
                         shop_id: shop_id,
+                        // 商户接单时间
                         receving_time: formatTime()
                     },
                     is_merchant_dispatch: is_merchant_dispatch

@@ -39,12 +39,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var public_js_1 = require("../../../function/public.js");
 //  获取订单
 var get_orders = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var openid, body, out_trade_no, d_user, user, sql, d_orders;
+    var openid, body, out_trade_no, is_my, d_user, user, sql, d_orders;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 openid = req.openid, body = req.body;
-                out_trade_no = body.out_trade_no;
+                out_trade_no = body.out_trade_no, is_my = body.is_my;
                 return [4 /*yield*/, (0, public_js_1.db_query)('select * from users_run where openid=?', openid)];
             case 1:
                 d_user = _a.sent();
@@ -58,9 +58,15 @@ var get_orders = function (req, res) { return __awaiter(void 0, void 0, void 0, 
                     return [2 /*return*/, (0, public_js_1.sendErr)(res, '请先开启工作状态！')
                         // 根据自身是否传入订单号来判别
                     ];
-                sql = "select * from orders where  order_over=1  and status=1";
+                // 是查询自己的订单还是所有订单
+                if (is_my) {
+                    sql = "SELECT *  FROM orders  WHERE JSON_EXTRACT(receving_order_info, '$.delivery_info.openid') = '".concat(openid, "';");
+                }
+                else {
+                    sql = "select * from orders where  (order_over=1 or order_over=2)  and status=1";
+                }
                 if (out_trade_no)
-                    sql += "  and out_trade_no=".concat(out_trade_no);
+                    sql = "select * from orders where  status=1 and out_trade_no=".concat(out_trade_no);
                 return [4 /*yield*/, (0, public_js_1.db_query)(sql)
                     // 空数据造成错误
                 ];
@@ -68,11 +74,14 @@ var get_orders = function (req, res) { return __awaiter(void 0, void 0, void 0, 
                 d_orders = _a.sent();
                 // 空数据造成错误
                 if (d_orders.eCode === 100 && !out_trade_no)
-                    return [2 /*return*/, (0, public_js_1.sendRes)(res, [], '暂无订单')];
+                    return [2 /*return*/, (0, public_js_1.sendRes)(res, [], '暂无订单')
+                        // 是否是指定查询，是指定订单查询那么我们要判断是否由此权限。
+                    ];
+                // 是否是指定查询，是指定订单查询那么我们要判断是否由此权限。
                 if (out_trade_no) {
                     // 空数据
                     if (!d_orders.code)
-                        return [2 /*return*/, (0, public_js_1.sendErr)(res, '无订单。')];
+                        return [2 /*return*/, (0, public_js_1.sendErr)(res, '查询不到此订单')];
                     d_orders.data = d_orders.data[0];
                     //    订单是否已接单
                     console.log(d_orders);
@@ -81,6 +90,7 @@ var get_orders = function (req, res) { return __awaiter(void 0, void 0, void 0, 
                         return [2 /*return*/, d_orders.data.receving_order_info.delivery_info.openid === openid ? (0, public_js_1.sendRes)(res, d_orders.data) : (0, public_js_1.sendErr)(res, '非本人接单，无权查看！')];
                     }
                 }
+                console.log(sql);
                 (0, public_js_1.sendRes)(res, d_orders.data);
                 return [2 /*return*/];
         }

@@ -169,7 +169,7 @@ var change_delivery_state = function (req, res) { return __awaiter(void 0, void 
                 // 根据目前状态来
                 switch (order_over) {
                     case 1:
-                        return [2 /*return*/, (0, public_1.sendErr)(res, '无法操作状态，商家尚未处理好订单。')];
+                        return [2 /*return*/, (0, public_1.sendErr)(res, '请先等待商家出单...')];
                     case 4:
                         return [2 /*return*/, (0, public_1.sendErr)(res, '无法操作状态，订单已完成。')
                             //  处理完毕，未开始配送

@@ -35,7 +35,7 @@ const change_tabbar_index = (value: number) => {
 }
 const arr_page = [
     {
-        text: '抢单',
+        text: '订单',
         icon: "xiugaidingdan"
     },
     {

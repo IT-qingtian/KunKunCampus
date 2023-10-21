@@ -167,6 +167,8 @@ const createOrder = (req, res) => {
                 take_goods_mode: 1,
                 // 店铺位置
                 shop_position: shop.address,
+                // 店铺电话
+                shop_phone: shop.phone_number,
                 //  备注
                 notes: '',
                 //     服务费

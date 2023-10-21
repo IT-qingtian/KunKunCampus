@@ -144,7 +144,13 @@ const run_get_user_info = (): Promise<result> => ax.post('/run/get_user_info',)
 const run_change_work_status = (is_work_ing: boolean): Promise<result> => ax.post('/run/change_work_status', {is_work_ing})
 
 /*获取订单*/
-const run_get_orders = (out_trade_no: string): Promise<result> => ax.post('/run/get_orders', {out_trade_no})
+const run_get_orders = (out_trade_no?: string, is_my?: boolean): Promise<result> => ax.post('/run/get_orders', {
+    out_trade_no,
+    is_my
+})
+const run_receving_order = (out_trade_no: string): Promise<result> => ax.post('/run/supermarket/receving', {out_trade_no})
+/*更新订单状态*/
+const run_update_order_state = (out_trade_no: string): Promise<result> => ax.post('/run/supermarket/change_delivery_state', {out_trade_no})
 // 导出
 export {
     boss_login,
@@ -166,5 +172,7 @@ export {
 
     run_get_user_info,
     run_change_work_status,
-    run_get_orders
+    run_get_orders,
+    run_receving_order,
+    run_update_order_state
 }
