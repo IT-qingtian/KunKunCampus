@@ -31,17 +31,21 @@ export default {
         },
         data: {out_trade_no}
       })
-      if (!code) return
-      uni.$showMsg(msg)
+      if (!code) return uni.$showMsg(msg)
     },
     // 评论
     async order_appraise(out_trade_no) {
       // 当处于并没有签收状态下
       if (this.pass) {
         // 收货
-        await this.order_confirm(out_trade_no)
+        const end_r = await this.order_confirm(out_trade_no)
         //   关闭显示
-        uni.hideToast()
+        // uni.hideToast()
+        if (!end_r.code) return uni.showToast({title: end_r.msg, icon: 'error'})
+        uni.showToast({title: end_r.msg, icon: 'success', duration: 2000})
+        setTimeout(() => {
+          uni.navigateTo({url: "/pages/order/index"})
+        }, 2000)
       }
       const url = serverAddress + "orders/appraise"
 

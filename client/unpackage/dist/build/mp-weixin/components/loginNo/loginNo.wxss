@@ -1,0 +1,1 @@
+.content{text-align:center}.header{height:50vh;display:flex;flex-direction:column;justify-content:center;align-items:center}.headImg{width:50vw;height:50vw;border-radius:50%;overflow:hidden}.container{padding:15px}.container .text{color:#90a4ae;width:100vw;font-size:25rpx;position:absolute;bottom:5px}

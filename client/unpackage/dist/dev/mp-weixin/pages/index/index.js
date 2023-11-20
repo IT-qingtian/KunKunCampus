@@ -101,7 +101,7 @@ var components
 try {
   components = {
     uNoticeBar: function () {
-      return Promise.all(/*! import() | node-modules/uview-ui/components/u-notice-bar/u-notice-bar */[__webpack_require__.e("common/vendor"), __webpack_require__.e("node-modules/uview-ui/components/u-notice-bar/u-notice-bar")]).then(__webpack_require__.bind(null, /*! uview-ui/components/u-notice-bar/u-notice-bar.vue */ 281))
+      return Promise.all(/*! import() | node-modules/uview-ui/components/u-notice-bar/u-notice-bar */[__webpack_require__.e("common/vendor"), __webpack_require__.e("node-modules/uview-ui/components/u-notice-bar/u-notice-bar")]).then(__webpack_require__.bind(null, /*! uview-ui/components/u-notice-bar/u-notice-bar.vue */ 292))
     },
   }
 } catch (e) {
@@ -177,6 +177,7 @@ console.log(_configs.default.serverAddress, 'dklasjdklasjdkl');
 var _default = {
   data: function data() {
     return {
+      a: "ggzz.png",
       funData: [{
         text: "每日签到",
         icon: 'qiandao',
@@ -187,7 +188,7 @@ var _default = {
         url: "fun_hongbao"
       }, {
         text: "超市&外卖",
-        icon: 'fuwuchaoshi',
+        icon: 'yuanquwaimaibeifen',
         url: "fun_chaoshi",
         active: true
       }, {
@@ -199,10 +200,34 @@ var _default = {
         icon: 'chuzuche',
         url: "fun_chuzuche"
       }, {
-        text: "取&寄快递",
+        text: "代取快递",
         icon: 'kuaidi',
         url: "fun_kuaidi",
         active: true
+      }, {
+        text: "食堂送餐",
+        icon: 'a-Artboard81star-rate',
+        fun: function fun() {
+          // 跳转进商店`
+          uni.navigateTo({
+            url: "/pages/fun_chaoshi/shop/index?id=0",
+            complete: function complete() {
+              console.log(123);
+            }
+          });
+        },
+        active: true
+      }],
+      bannerData: [{
+        // 图片名
+        fileName: "ggzz.png",
+        //   跳转地址
+        url: "/pages/banner/ggzz/index"
+      }, {
+        // 图片名
+        fileName: "zbmm.png",
+        //   跳转地址
+        url: "/pages/banner/zbmm/index"
       }],
       title: 'Hello'
     };
@@ -225,16 +250,25 @@ var _default = {
     }))();
   },
   methods: _objectSpread(_objectSpread({}, (0, _vuex.mapMutations)('store_user', ['updateToken', 'get_user_address'])), {}, {
+    // 按下banner
+    banner_click: function banner_click(index) {
+      var item = this.bannerData[index];
+      item.url && uni.navigateTo({
+        url: item.url
+      });
+    },
     //  用于转发到其他功能上面。
     fun_run: function fun_run(data) {
       //  打开页面
-      var url = "/pages/".concat(data.url, "/index");
-      data.url && uni.navigateTo({
-        url: url
-      });
-      console.log("url是：", url);
+      if (data.url) {
+        var url = "/pages/".concat(data.url, "/index");
+        data.url && uni.navigateTo({
+          url: url
+        });
+        console.log("url是：", url);
+      }
       //  有单独条件就执行单独条件
-      this[data.icon] && this[data.icon]();
+      data.fun && data.fun();
     }
   }),
   mounted: function mounted() {}

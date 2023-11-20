@@ -2,16 +2,16 @@
   <div class="container">
     <div class="card">
       <div class="card_item">
-        <div class="left">栋号</div>
+        <div class="left">门牌号</div>
         <div class="right">
-          <input v-model="userInfo_.numberPlate" type="text" maxlength="8" placeholder="栋号-门牌号">
+          <input v-model="userInfo_.numberPlate" type="number" maxlength="5" placeholder="请填写宿舍门牌号">
         </div>
       </div>
       <div class="card_item">
         <div class="left">姓名</div>
         <div class="right">
-          <input v-model="userInfo_.name" @input="updateUserInfoName" type="nickname" maxlength="7"
-                 placeholder="称呼">
+          <input v-model="userInfo_.name" @input="updateUserInfoName" maxlength="7"
+                 placeholder="请输入您的姓名">
         </div>
       </div>
       <!--      <div class="card_item">-->
@@ -45,9 +45,11 @@
     <div class="button" @click='saveInfo'>
       {{ modify ? "修改" : "添加" }}
     </div>
+
+    <!-- 级联选择-->
+    <!--    <u-picker :show="true" :columns="columns" @change="change_address"></u-picker>-->
   </div>
 </template>
-
 <script>
 import {mapMutations, mapState} from 'vuex'
 
@@ -67,7 +69,7 @@ export default {
         //  电话号
         phoneCode: '',
         // sex: "男"
-      }
+      },
     }
   },
   computed: {
@@ -75,14 +77,28 @@ export default {
   },
   methods: {
     ...mapMutations('store_user', ['add_address']),
+    // 验证手机号
+    isMobileNumber(number) {
+      const mobilePattern = /^((13[0-9])|(14[5|7])|(15([0-3]|[5-9]))|(17[013678]|(18[0-9]|19[89])))\d{8}$/;
+      return mobilePattern.test(number);
+    },
     //  保存信息
     async saveInfo() {
       //  校验对象完整新
       for (const key in this.userInfo_) {
         //  没有值
-        if (!this.userInfo_[key]) return uni.$showMsg(`${key} 值未填写`)
+        if (!this.userInfo_[key]) return uni.showToast({
+          title: "信息不完整！",
+          icon: "error"
+        })
       }
 
+      //  校验手机号
+
+      if (!this.isMobileNumber(this.userInfo_.phoneCode)) return uni.showToast({
+        title: "您输入的手机号不是一个有效的手机号！",
+        icon: "error"
+      })
       //  判定是修改还是新增
       if (this.modify) {
         // 发送数据

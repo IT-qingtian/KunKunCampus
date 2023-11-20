@@ -1,0 +1,8 @@
+{
+  "enablePullDownRefresh": true,
+  "navigationBarTitleText": "订单记录",
+  "usingComponents": {
+    "order-yes": "/components/orderYes/orderYes",
+    "order-no": "/components/orderNo/orderNo"
+  }
+}

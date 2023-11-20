@@ -23,6 +23,7 @@ a {
     }
   }
 
+
   .content {
     display: flex;
     //justify-content: space-between;
@@ -43,7 +44,7 @@ a {
       .goods_describe {
         font-weight: lighter;
         color: grey;
-        height: 120rpx;
+        //height: 120rpx;
         overflow: hidden;
         text-overflow: ellipsis;
       }

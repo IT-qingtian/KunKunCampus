@@ -101,13 +101,13 @@ var components
 try {
   components = {
     uniEasyinput: function () {
-      return __webpack_require__.e(/*! import() | uni_modules/uni-easyinput/components/uni-easyinput/uni-easyinput */ "uni_modules/uni-easyinput/components/uni-easyinput/uni-easyinput").then(__webpack_require__.bind(null, /*! @/uni_modules/uni-easyinput/components/uni-easyinput/uni-easyinput.vue */ 310))
+      return __webpack_require__.e(/*! import() | uni_modules/uni-easyinput/components/uni-easyinput/uni-easyinput */ "uni_modules/uni-easyinput/components/uni-easyinput/uni-easyinput").then(__webpack_require__.bind(null, /*! @/uni_modules/uni-easyinput/components/uni-easyinput/uni-easyinput.vue */ 321))
     },
     uniCard: function () {
       return Promise.resolve(/*! import() */).then(__webpack_require__.bind(null, /*! @/uni_modules/uni-card/components/uni-card/uni-card.vue */ 202))
     },
     shop_item_default: function () {
-      return Promise.all(/*! import() | components/shop_item_default/shop_item_default */[__webpack_require__.e("common/vendor"), __webpack_require__.e("components/shop_item_default/shop_item_default")]).then(__webpack_require__.bind(null, /*! @/components/shop_item_default/shop_item_default.vue */ 317))
+      return Promise.all(/*! import() | components/shop_item_default/shop_item_default */[__webpack_require__.e("common/vendor"), __webpack_require__.e("components/shop_item_default/shop_item_default")]).then(__webpack_require__.bind(null, /*! @/components/shop_item_default/shop_item_default.vue */ 328))
     },
   }
 } catch (e) {
@@ -239,31 +239,58 @@ var _default = {
     clickSort: function clickSort(i) {
       this.sort_selected = i;
       //   根据当前选择项来执行
+      console.log(i, 'lksadjlkasjdkl');
       this.sort[this.sort_selected].fun && this.sort[this.sort_selected].fun();
 
       //   本地更新偏好
       uni.setStorageSync('sort_preference', i);
     },
-    search: function search(e) {
-      var keyString = this.search_value;
-      // 还原
+    search_enter: function search_enter() {
+      // 根据内容判定应该搜索还是清空
+      var keyString = this.search_value.trim();
+      // 当前全部
       this.clickSort(this.sort_selected);
-      if (e === 'suffix' && keyString) {
-        //   搜索
-        var regexp = new RegExp("\"name\":\".*".concat(keyString, ".*\""));
-        this.shopData_render = this.shopData_render.filter(function (item) {
-          return item.title.includes(keyString) || regexp.test(JSON.stringify(item.goods)) || item.tags.includes(keyString);
+      if (keyString) {
+        if (keyString.length < 2) return uni.showToast({
+          title: '请至少输入两个字符',
+          icon: "error"
         });
+        this.search(keyString);
       } else {
         // 叉掉
         this.search_value = '';
       }
     },
+    icon_click: function icon_click(e) {
+      var keyString = this.search_value.trim();
+      // 当前全部
+      this.clickSort(this.sort_selected);
+      if (e === 'suffix' && keyString) {
+        if (keyString === '') return uni.showToast({
+          title: '请先输入搜索内容',
+          icon: "error"
+        });
+        if (keyString.length < 2) return uni.showToast({
+          title: '请至少输入两个字符',
+          icon: "error"
+        });
+        this.search(keyString);
+      } else {
+        // 叉掉
+        this.search_value = '';
+      }
+    },
+    search: function search(keyString) {
+      //   搜索
+      var regexp = new RegExp("\"name\":\".*".concat(keyString, ".*\""));
+      this.shopData_render = this.shopData_render.filter(function (item) {
+        return item.title.includes(keyString) || regexp.test(JSON.stringify(item.goods)) || item.tags.includes(keyString);
+      });
+    },
     navClick: function navClick(item, index) {
       var _this2 = this;
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee() {
-        var _uni$getStorageSync;
-        var id, _yield$uni$$httpReque, _yield$uni$$httpReque2, code, data, msg;
+        var id, _yield$uni$$httpReque, _yield$uni$$httpReque2, code, data, msg, sort_preference;
         return _regenerator.default.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
@@ -295,9 +322,9 @@ var _default = {
                 return _context.abrupt("return", uni.$showMsg(msg));
               case 11:
                 _this2.shopData = data.result;
-                // 渲染
-                _this2.clickSort((_uni$getStorageSync = uni.getStorageSync('sort_preference')) !== null && _uni$getStorageSync !== void 0 ? _uni$getStorageSync : 0);
-              case 13:
+                sort_preference = uni.getStorageSync('sort_preference');
+                _this2.clickSort(sort_preference ? sort_preference : 0);
+              case 14:
               case "end":
                 return _context.stop();
             }

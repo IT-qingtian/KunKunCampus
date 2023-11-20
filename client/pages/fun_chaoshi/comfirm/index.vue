@@ -2,51 +2,56 @@
   <div class="container">
     <div class="content">
       <u-notify ref="uNotify"></u-notify>
-      <uni-card v-if="!orderInfo.status">
-        <div class="select_mode">
-          <div :class="{select:orderInfo.take_goods_mode==0}" @click="orderInfo.take_goods_mode = 0">外卖
-          </div>
-          <div :class="{select:orderInfo.take_goods_mode==1}" @click="orderInfo.take_goods_mode = 1">自提
-          </div>
-        </div>
-        <div class="mode">
-          <!--外卖-->
-          <div v-show='orderInfo.take_goods_mode===0' class="wm">
-            <div v-show='orderInfo.take_goods_mode===0' class="position_select" @click="select_address">
-              <!--地址选择器-->
-              <u-icon name="map" color="black" size="20"></u-icon>
-              <!--            地址信息-->
-              <div class="position">
-                <div class="position_info" v-if="userInfo.address.length">
-                  {{ userInfo.address[0].numberPlate }}
-                  {{ userInfo.address[0].name }}
-                  {{ userInfo.address[0].phoneCode }}
-                </div>
-                <div class="no_position" v-else>
-                  您还没有选择地址
-                </div>
-              </div>
-              <!--            选择按钮-->
-              <u-icon name="arrow-right" color="black" size="28"></u-icon>
+      <div class="select_mode">
+        <uni-card v-if="!orderInfo.status ">
+          <div class="select_mode">
+            <div :class="{select:orderInfo.take_goods_mode==0}" @click="orderInfo.take_goods_mode = 0">配送
+            </div>
+            <div
+                v-if="orderInfo.shop_position"
+                :class="{select:orderInfo.take_goods_mode==1}"
+                @click="orderInfo.take_goods_mode = 1"
+            >自提
             </div>
           </div>
-          <!--自提-->
-          <div v-show='orderInfo.take_goods_mode===1' class="zt">
-            <p>请自行前往店铺自提 ：</p>
-            {{ orderInfo.shop_position }}
+          <div class="mode">
+            <!--外卖-->
+            <div v-show='orderInfo.take_goods_mode===0' class="wm">
+              <div v-show='orderInfo.take_goods_mode===0' class="position_select" @click="select_address">
+                <!--地址选择器-->
+                <u-icon name="map" color="black" size="20"></u-icon>
+                <!--            地址信息-->
+                <div class="position">
+                  <div class="position_info" v-if="userInfo.address.length">
+                    {{ userInfo.address[0].numberPlate }}
+                    {{ userInfo.address[0].name }}
+                    {{ userInfo.address[0].phoneCode }}
+                  </div>
+                  <div class="no_position" v-else>
+                    您还没有选择地址
+                  </div>
+                </div>
+                <!--            选择按钮-->
+                <u-icon name="arrow-right" color="black" size="28"></u-icon>
+              </div>
+            </div>
+            <!--自提-->
+            <div v-show='orderInfo.take_goods_mode===1' class="zt">
+              <p>请自行前往店铺自提 ：</p>
+              {{ orderInfo.shop_position }}
+            </div>
           </div>
-        </div>
-      </uni-card>
-      <uni-card v-else>
-        <div>
-          <!--根据 order_over 是否完成，0未接单，1是已接单，2是已完成。3是评价-->
-          <div v-if="orderInfo.order_over === 0">等待接单……</div>
-          <div v-else-if="orderInfo.order_over === 1">正在等待出餐</div>
-          <div v-else-if="orderInfo.order_over === 2">订单已完成</div>
-          <div v-else-if="orderInfo.order_over === 3">评论</div>
-        </div>
-      </uni-card>
-
+        </uni-card>
+        <uni-card v-else>
+          <div>
+            <!--根据 order_over 是否完成，0未接单，1是已接单，2是已完成。3是评价-->
+            <div v-if="orderInfo.order_over === 0">等待接单……</div>
+            <div v-else-if="orderInfo.order_over === 1">正在等待出餐</div>
+            <div v-else-if="orderInfo.order_over === 2">订单已完成</div>
+            <div v-else-if="orderInfo.order_over === 3">评论</div>
+          </div>
+        </uni-card>
+      </div>
 
       <uni-card>
         <!--商品列表-->
@@ -75,11 +80,11 @@
             <li>
               <view class="other">
                 <div class="key">服务费</div>
-                <div class="value">{{ orderInfo.service_fee }}元</div>
+                <div class="value">{{ service_fee.shop }}元</div>
               </view>
               <view class="other" v-if="!orderInfo.take_goods_mode">
                 <div class="key">配送费</div>
-                <div class="value">{{ orderInfo.delivery_fee }}元</div>
+                <div class="value">{{ service_fee.shop_delivery }}元</div>
               </view>
             </li>
           </ul>
@@ -101,7 +106,7 @@
     <div class="settle" v-if="!orderInfo.status">
       <div class="money">
         <text>￥ {{
-            checkout + orderInfo.service_fee + (orderInfo.take_goods_mode ? 0 : orderInfo.delivery_fee)
+            (checkout + service_fee.shop + (orderInfo.take_goods_mode ? 0 : service_fee.shop_delivery)).toFixed(2)
           }}元
         </text>
       </div>
@@ -144,12 +149,11 @@ export default {
     order() {
       return order
     },
-    ...mapState('store_user', ['token', 'userInfo', 'temp_data']),
+    ...mapState('store_user', ['token', 'userInfo', 'temp_data', 'service_fee']),
     // 结账
     checkout() {
       // 遍历goods
       const goods = this.orderInfo.goods
-
       return goods.reduce((price_, item) => {
         const {price, number} = item
         return Number((price_ + price * number).toFixed(2))
@@ -162,10 +166,14 @@ export default {
       // 跳转到地址选择
       uni.navigateTo({url: '/pages/fun_kuaidi_use_user/index'})
     },
+
+    // 付款
     async pay() {
       // 如果正在执行那就不执行
+      console.log(this.payIng, 'e')
       if (this.payIng) return
       this.payIng = true
+
       //  当外送时 检查地址
       if (!this.orderInfo.take_goods_mode && !this.userInfo.address.length) {
         this.payIng = false
@@ -175,103 +183,147 @@ export default {
       //  附带地址
       this.orderInfo.address = this.userInfo.address[0]
 
-      // 修改订单数据
-      const updateOrder = await uni.$httpRequest({
-        url: "shop/change",
+      // // 修改订单数据
+      // const updateOrder = await uni.$httpRequest({
+      //   url: "shop/change",
+      //   method: "post",
+      //   header: {
+      //     'authorization': `bearer ${this.token}`
+      //   },
+      //   data: {
+      //     out_trade_no: this.orderInfo.out_trade_no,
+      //     take_goods_mode: this.orderInfo.take_goods_mode,
+      //     address: this.orderInfo.address,
+      //     notes: this.orderInfo.notes
+      //   }
+      // })
+      // const {data: {code, data, msg}} = updateOrder
+      // if (!code) {
+      //   this.payIng = false
+      //   return this.$refs.uNotify.error(msg)
+      // }
+      // this.orderInfo.out_trade_no = data.out_trade_no
+      //
+      // console.log(data, this.orderInfo.out_trade_no)
+
+      // 生成支付信息
+      const {data: pay_info_r} = await uni.$httpRequest({
+        url: "shop/res_pay",
         method: "post",
         header: {
           'authorization': `bearer ${this.token}`
         },
+        // 必要信息
         data: {
+          // 订单号
           out_trade_no: this.orderInfo.out_trade_no,
+          // 配送模式
           take_goods_mode: this.orderInfo.take_goods_mode,
+          // 地址
           address: this.orderInfo.address,
+          // 备注
           notes: this.orderInfo.notes
         }
       })
-      const {data: {code, data, msg}} = updateOrder
-      if (!code) {
-        this.payIng = false
-        return this.$refs.uNotify.error(msg)
-      }
-      this.orderInfo.out_trade_no = data.out_trade_no
+      this.payIng = false
 
-      console.log(data, this.orderInfo.out_trade_no)
+      if (!pay_info_r.code) return this.$refs.uNotify.error(pay_info_r.msg)
 
-      let visa_info = this.temp_data.pay
+      const {payInfo} = pay_info_r.data
 
-      // let visa_info = null
-      // 检测是否携带info 没有的话就重新获取签证信息。
-
-      if (!visa_info) {
-        //  非携带签证 需要先发起请求。  订单查询
-        const {data: result_visa} = await uni.$httpRequest({
-          url: "orders/orderPay",
-          method: "post",
-          header: {
-            'authorization': `bearer ${this.token}`
-          },
-          data: {out_trade_no: this.orderInfo.out_trade_no}
-        })
-        if (!result_visa.code) {
-          this.payIng = false
-          return this.$refs.uNotify.error(result_visa.msg)
-        }
-        //     更新签证信息
-        visa_info = result_visa.data.payInfo
-      }
+      console.log(payInfo)
 
       // 调用支付
       uni.requestPayment({
         provider: "wxpay",
-        // 支付数据
-        ...visa_info,
-        // 支付成功后查询订单
-        success: async (res) => {
-          console.log("支付成功", res);
-          //  支付成功后，查询订单
-          const data = {
-            //  提交刚刚的订单号 和 交易取件信息
-            out_trade_no: visa_info.out_trade_no,
-            //  订单信息
-            orderInfo: this.orderInfo
-          };
-          // 输出data
-          console.log("data:", data);
-          const {data: result_qeury_data} = await uni.$httpRequest({
+        ...payInfo,
+        success: async res => {
+          const {data: query_r} = await uni.$httpRequest({
             //  查询本订单
             url: "shop/order_query",
             method: "post",
             header: {
               authorization: "bearer " + this.token,
             },
-            data,
-          });
-          //  解析情况
-          uni.showModal({
-            content: result_qeury_data.msg,
-            showCancel: false,
-            success: (res) => {
-              if (res.confirm) {
-                uni.switchTab({
-                  url: "/pages/index/index",
-                });
-              }
+            data: {
+              out_trade_no: this.orderInfo.out_trade_no
             },
           });
-          console.log(result_qeury_data, 'ok')
+          if (!query_r.code) return this.$refs.uNotify.error(query_r.msg)
+          //   回到订单页面
+          uni.showModal({
+            content: query_r.msg,
+            showCancel: false,
+            success: (res) => {
+              uni.switchTab({
+                url: "/pages/order/index",
+              });
+            },
+          });
         },
         fail: err => {
-          console.log("支付失败", err);
+          console.log(err)
           return this.$refs.uNotify.error('支付失败啦。')
-        },
-        complete: () => {
-          this.payIng = false
         }
       })
+
+      this.payIng = false
+
+      // 调用支付
+      // uni.requestPayment({
+      //   provider: "wxpay",
+      //   // 支付数据
+      //   ...visa_info,
+      //   // 支付成功后查询订单
+      //   success: async (res) => {
+      //     console.log("支付成功", res);
+      //     //  支付成功后，查询订单
+      //     const data = {
+      //       //  提交刚刚的订单号 和 交易取件信息
+      //       out_trade_no: visa_info.out_trade_no,
+      //       //  订单信息
+      //       orderInfo: this.orderInfo
+      //     };
+      //     // 输出data
+      //     console.log("data:", data);
+      //     const {data: result_qeury_data} = await uni.$httpRequest({
+      //       //  查询本订单
+      //       url: "shop/order_query",
+      //       method: "post",
+      //       header: {
+      //         authorization: "bearer " + this.token,
+      //       },
+      //       data,
+      //     });
+      //     //  解析情况
+      //     uni.showModal({
+      //       content: result_qeury_data.msg,
+      //       showCancel: false,
+      //       success: (res) => {
+      //         if (res.confirm) {
+      //           uni.switchTab({
+      //             url: "/pages/order/index",
+      //           });
+      //         }
+      //       },
+      //     });
+      //     console.log(result_qeury_data, 'ok')
+      //   },
+      //   fail: err => {
+      //     console.log("支付失败", err);
+      //     return this.$refs.uNotify.error('支付失败啦。')
+      //   },
+      //   complete: () => {
+      //     this.payIng = false
+      //   }
+      // })
     }
   },
   async onLoad(op) {
+    console.log('==========')
+    console.log('service_fee', this.service_fee)
+    console.log('==========')
+
     let {out_trade_no} = op
     // 根据订单号查询 本订单状态。
     const {data: {code, msg, data}} = await uni.$httpRequest({
@@ -286,13 +338,14 @@ export default {
       }
     });
 
-    if (!code) return this.$refs.uNotify.error(msg)
+    if (!code) {
+      return this.$refs.uNotify.error(msg)
+    }
     console.log('查询到的订单数据。', data)
 
 
     let {data: orderData, order_over, status} = data.orderInfo
     const {goods} = orderData
-
 
     //     判定参数是否整齐
     if (!goods || !orderData.shop_title) {
@@ -447,6 +500,10 @@ export default {
         background-color: #d3d33f;
       }
     }
+  }
+
+  uni-card {
+    width: 100%;
   }
 }
 </style>

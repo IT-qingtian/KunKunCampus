@@ -1,0 +1,8 @@
+{
+  "navigationBarTitleText": "外卖超市",
+  "usingComponents": {
+    "uni-easyinput": "/uni_modules/uni-easyinput/components/uni-easyinput/uni-easyinput",
+    "uni-card": "/uni_modules/uni-card/components/uni-card/uni-card",
+    "shop_item_default": "/components/shop_item_default/shop_item_default"
+  }
+}

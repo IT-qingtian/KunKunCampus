@@ -18,6 +18,7 @@
           <u-tag
               size="mini"
               dark
+              type="warning"
               v-for="(tag,index_tag) in shopData.tags"
               :key='index_tag' :text="tag">
           </u-tag>
@@ -70,7 +71,9 @@
                       <!--以及商品-->
                       <ul class="goods_">
                         <li v-for="(shops,index_) in goods.goods"
-                            :key="index_">
+                            :key="index_"
+                            v-if="!shops.isOff"
+                        >
                           <div>
                             <div class="img">
                               <image mode="widthFix"
@@ -137,10 +140,10 @@
                   <text>￥{{ place_order_price }}元</text>
                 </div>
                 <div class="over">
-                  <p v-if="!place_order_price">{{ shopData.start_run_price }}元起送</p>
-                  <p v-else-if="place_order_price < shopData.start_run_price">
+                  <p v-if="!place_order_price">{{ shopData.mdp }}元起送</p>
+                  <p v-else-if="place_order_price < shopData.mdp">
                     差{{
-                      Math.round((shopData.start_run_price - place_order_price) * 100) / 100
+                      Math.round((shopData.mdp - place_order_price) * 100) / 100
                     }}元起送</p>
                   <div v-else @click="click_place_order">确认订单</div>
                 </div>
@@ -162,13 +165,34 @@
                       v-for="(item,index) in shopData.comment"
                       :key="index">
                     <view class="head" style="display: flex;align-items: center">
-                      <u-avatar size="20" :src="item.head"></u-avatar>
-                      <text class="name">{{ item.name }}</text>
+                      <div class="user">
+                        <u-avatar size="20" :src="item.head"></u-avatar>
+                        <text class="name">{{ item.name }}</text>
+                      </div>
+                      <div class="time">
+                        {{ item.appraise_time }}
+                      </div>
                     </view>
                     <view class="body">
+                      <div class="rate">
+                        <u-rate
+                            active-color="rgb(255,187,23)"
+                            readonly="true"
+                            :value="item.goods_rate">
+                        </u-rate>
+                      </div>
                       <view class="content">{{ item.content }}</view>
                       <view class="img" v-if="item.img">
-                        <img mode="widthFix" :src="serverAddress + item.img.replaceAll('\\','/')" alt="（找不到图片）">
+                        <image
+                            mode="widthFix"
+                            :src="serverAddress + item.img.replaceAll('\\','/')"
+                            @error="loadCoommentErr(item)"
+                        ></image>
+                        <!--                        <image-->
+                        <!--                            mode="widthFix"-->
+                        <!--                            :src="serverAddress + item.img.replaceAll('\\','/')"-->
+                        <!--                            @error="(item.img = null)"-->
+                        <!--                        ></image>-->
                       </view>
                     </view>
                   </view>
@@ -182,17 +206,21 @@
 
           <swiper-item>
             <div class="page merchant">
-              <view class="item">
+              <view class="item" v-if="shopData.address">
                 <view class="key">商户地址</view>
                 <view class="value">{{ shopData.address }}</view>
               </view>
-              <view class="item">
+              <view class="item" v-if="shopData.phone_number">
                 <view class="key">商家电话</view>
                 <view class="value">{{ shopData.phone_number }}</view>
               </view>
               <view class="item">
                 <view class="key">营业时间</view>
                 <view class="value">{{ shopData.start_time }} - {{ shopData.end_time }}</view>
+              </view>
+              <view class="item">
+                <view class="key">营业周期</view>
+                <view class="value">{{ get_trade_cycle }}</view>
               </view>
               <!--展示图-->
               <view class="t">
@@ -297,6 +325,22 @@ export default {
   },
   methods: {
     ...mapMutations('store_user', ['update_temp_data']),
+    // 获取营业周期
+    get_trade_cycle() {
+      let text = ''
+      const {trade_time} = this.shopData
+      trade_time[1] && (text += '周一、')
+      trade_time[2] && (text += '周二、')
+      trade_time[3] && (text += '周三、')
+      trade_time[4] && (text += '周四、')
+      trade_time[5] && (text += '周五、')
+      trade_time[6] && (text += '周六、')
+      trade_time[0] && (text += '周日')
+      return text
+    },
+    loadCoommentErr(e) {
+      e.img = null
+    },
     showImg(address) {
       this.imgShow.address = address
       this.imgShow.is = true
@@ -355,6 +399,7 @@ export default {
 
 
       this.shopData = data.result
+      this.shopData.comment.reverse()
       this.loading = false
       console.log(this.shopData, '格式化以后的店铺数据')
       this.is_business()
@@ -368,11 +413,15 @@ export default {
     // 打样判定
     is_business() {
       const dt = new Date();
-      const {start_time, end_time} = this.shopData;
+      const {start_time, end_time, trade_time} = this.shopData;
       const currentTime = `${String(dt.getHours()).padStart(2, '0')}:${String(dt.getMinutes()).padStart(2, '0')}`;
-      if (!(currentTime >= start_time && currentTime <= end_time)) {
+
+      // 判断今天是否是工作日
+      const day_ = new Date().getDay()
+
+      if (!(currentTime >= start_time && currentTime <= end_time && trade_time[day_])) {
         uni.showToast({
-          title: "店家已打样~",
+          title: "店家已打样，无法点餐了",
           icon: "error"
         });
         return false
@@ -421,10 +470,9 @@ export default {
           goods: goods_
         }
       })
-      console.log(data, msg, code)
       this.place_order_ing = false
       if (!code) return uni.$showMsg(msg)
-      const {payInfo, subscribeMessageArray} = data
+      const {out_trade_no, subscribeMessageArray} = data
       // 授权订阅消息
       uni.requestSubscribeMessage({
         tmplIds: subscribeMessageArray,
@@ -434,7 +482,7 @@ export default {
           // this.update_temp_data({pay: payInfo})
           // 跳转页面的时候 携带订单号 以便页面去查询
           uni.navigateTo({
-            url: `/pages/fun_chaoshi/comfirm/index?out_trade_no=${payInfo.out_trade_no}`
+            url: `/pages/fun_chaoshi/comfirm/index?out_trade_no=${out_trade_no}`
           })
         }
       })
@@ -530,6 +578,7 @@ export default {
     }
 
     .notice {
+      margin: 8px 0;
       display: block;
       //color: #8f8f94;
       font-size: 30rpx;
@@ -603,13 +652,15 @@ export default {
             flex: 2;
             text-align: center;
             box-sizing: border-box;
-            color: #8f8f94;
+            //color: rgb(245, 245, 245);
+            background-color: rgb(245, 245, 245);
 
             ul {
-              background-color: #e1e1e1;
+              //background-color: #e1e1e1;
 
               li {
-                background-color: white;
+                color: black;
+                //background-color: white;
                 padding: 10px;
                 transition: all 0.5s;
                 -moz-border-radius-topright: 25%;
@@ -618,11 +669,27 @@ export default {
               }
 
               .nav_active {
-                color: black;
-                background-color: #e1e1e1 !important;
+                position: relative;;
+                background-color: white !important;
+                //background-color: #e1e1e1 !important;
                 border-radius: 0;
                 //-moz-border-radius-topright: 0;
                 //-moz-border-radius-bottomright: 0;
+                font-weight: bold;
+                color: rgb(244, 114, 92);
+              }
+
+              //  在前面加一个橙色竖条
+              .nav_active::before {
+                position: absolute;;
+                left: 0;
+                content: '';
+                display: inline-block;
+                height: 70%; /* 设置为与元素高度相同 */
+                width: 4px; /* 设置为所需宽度 */
+                border-radius: 2px;
+                background-color: rgb(244, 114, 92); /* 设置为橙色 */
+                vertical-align: middle; /* 使其垂直居中 */
               }
             }
           }
@@ -753,8 +820,15 @@ export default {
           padding: 5px;
 
           .head {
-            .name {
-              margin-left: 5px;
+            display: flex;
+            justify-content: space-between;
+
+            .user {
+              display: flex;
+
+              .name {
+                margin-left: 5px;
+              }
             }
           }
 

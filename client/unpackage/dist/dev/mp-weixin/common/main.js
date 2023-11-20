@@ -34,11 +34,23 @@ uni.$showMsg = function () {
     icon: 'none'
   });
 };
+
+// 前往登陆
+uni.$gotoLogin = function () {
+  uni.switchTab({
+    url: "/pages/my/index",
+    success: function success() {
+      // setTimeout(() => {
+      uni.$showMsg("您还没有登录或登录已失效，请先登录后再访问吧！");
+      // }, 3000)
+    }
+  });
+};
+
 uni.$httpRequest = function (options) {
   uni.$showMsg('请求数据中……');
   //  发起请求那就提示弹框
   return new Promise(function (resolve, reject) {
-    //
     if (!options.noBaseUrl) options.url = _configs.default.serverAddress + options.url;
     uni.request(_objectSpread(_objectSpread({}, options), {}, {
       // url: configs.serverAddress + options.url,
@@ -46,6 +58,28 @@ uni.$httpRequest = function (options) {
       // data: options.data,
       // header: options.header,
       success: function success(e) {
+        if (!e.data) {
+          //     没数据返回
+          console.log('链接服务器失败！');
+          e.data = {
+            code: 0,
+            msg: "无数据返回"
+          };
+        }
+        var _e$data = e.data,
+          code = _e$data.code,
+          msg = _e$data.msg; //内部内容
+
+        if (code === 0 && msg === '身份码无效！') {
+          // 当code为 0 并且msg为身份码无效！ 那就说明没有登录
+          _store.default.state.store_user.token = ''; // 清理掉token
+
+          //     跳转到登陆页面
+          setTimeout(function () {
+            uni.$gotoLogin();
+          }, 200);
+        }
+        uni.hideToast();
         resolve(e);
       },
       fail: reject
@@ -144,18 +178,19 @@ var _default = {
   //   ...mapState('store_user', ['subscribeMessages_templIDs']),
   // },
   mounted: function mounted() {},
-  methods: _objectSpread(_objectSpread({}, (0, _vuex.mapMutations)('store_user', ['updateSubscribeMessages_templIDs', 'get_user_address'])), {}, {
-    get_subscribeMessage: function get_subscribeMessage() {
+  methods: _objectSpread(_objectSpread({}, (0, _vuex.mapMutations)('store_user', ['updateSubscribeMessages_templIDs', 'update_dorm_sex_group', 'updateServiceFee', 'get_user_address'])), {}, {
+    // 获取基础内容
+    get_base_data: function get_base_data() {
       var _this = this;
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee() {
-        var _yield$uni$$httpReque, _yield$uni$$httpReque2, code, msg, data;
+        var _yield$uni$$httpReque, _yield$uni$$httpReque2, code, msg, data, service_fee, subScribeMesTIDS, dorm_sex_group;
         return _regenerator.default.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
                 _context.next = 2;
                 return uni.$httpRequest({
-                  url: "my/getSubscribeMesTIDS"
+                  url: "my/get_base_data"
                 });
               case 2:
                 _yield$uni$$httpReque = _context.sent;
@@ -163,12 +198,31 @@ var _default = {
                 code = _yield$uni$$httpReque2.code;
                 msg = _yield$uni$$httpReque2.msg;
                 data = _yield$uni$$httpReque2.data;
-                if (!code) console.error('错误，无法获取到最新 订阅消息模板组');
+                if (code) {
+                  _context.next = 9;
+                  break;
+                }
+                return _context.abrupt("return", console.error('错误，无法获取到基础数据'));
+              case 9:
+                service_fee = data.service_fee, subScribeMesTIDS = data.subScribeMesTIDS, dorm_sex_group = data.dorm_sex_group;
+                console.log('========');
+                console.log('获取到的base数据');
+                console.log(data);
+                console.log('========');
+
                 // 更新订阅消息模板ID
-                _this.updateSubscribeMessages_templIDs(data);
+                _this.updateSubscribeMessages_templIDs(subScribeMesTIDS);
+                console.log('获取到的所有模板消息id如下：', subScribeMesTIDS);
+
+                // 更新服务费
+                _this.updateServiceFee(service_fee);
+
+                // 更新宿舍栋数分组
+                _this.update_dorm_sex_group(dorm_sex_group);
+
                 // 获取地址
-                _this.get_user_address();
-              case 10:
+                _this.get_user_address(true);
+              case 19:
               case "end":
                 return _context.stop();
             }
@@ -178,6 +232,7 @@ var _default = {
     }
   }),
   onLaunch: function onLaunch() {
+    this.get_base_data();
     console.log('App Launch');
   },
   onShow: function onShow() {

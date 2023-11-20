@@ -1,21 +1,15 @@
 <template>
   <view class="content">
     <div class="notice" style="margin: 8px;width: 90%">
-      <u-notice-bar text="本产品为技术联系产品，非正式运营。有任何疑问请联系作者，QQ876340000"></u-notice-bar>
+      <u-notice-bar text="程序初期阶段，功能较少，请大胆使用，我们会努力更新业务哒！！！"></u-notice-bar>
+      <!--      <u-notice-bar text="尽管拼搏，琐事给我~"></u-notice-bar>-->
     </div>
-
     <!--轮播图-->
     <view class="swiper">
       <view>
         <swiper indicator-dots autoplay circular>
-          <swiper-item>
-            <image src="@/static/index/ggzz.png"></image>
-          </swiper-item>
-          <swiper-item>
-            <image src="@/static/index/ggzz.png"></image>
-          </swiper-item>
-          <swiper-item>
-            <image src="@/static/index/ggzz.png"></image>
+          <swiper-item v-for="(item,index) in bannerData" :key="index">
+            <image :src="'/static/banner/' + item.fileName" @click="banner_click(index)"></image>
           </swiper-item>
         </swiper>
       </view>
@@ -42,6 +36,7 @@ console.log(cfg.serverAddress, 'dklasjdklasjdkl')
 export default {
   data() {
     return {
+      a: "ggzz.png",
       funData: [
         {
           text: "每日签到",
@@ -53,7 +48,7 @@ export default {
           url: "fun_hongbao"
         }, {
           text: "超市&外卖",
-          icon: 'fuwuchaoshi',
+          icon: 'yuanquwaimaibeifen',
           url: "fun_chaoshi",
           active: true
         }, {
@@ -65,10 +60,37 @@ export default {
           icon: 'chuzuche',
           url: "fun_chuzuche"
         }, {
-          text: "取&寄快递",
+          text: "代取快递",
           icon: 'kuaidi',
           url: "fun_kuaidi",
           active: true
+        }, {
+          text: "食堂送餐",
+          icon: 'a-Artboard81star-rate',
+          fun: () => {
+            // 跳转进商店`
+            uni.navigateTo({
+                  url: "/pages/fun_chaoshi/shop/index?id=0",
+                  complete: () => {
+                    console.log(123)
+                  }
+                }
+            )
+          },
+          active: true
+        }
+      ],
+      bannerData: [
+        {
+          // 图片名
+          fileName: "ggzz.png",
+          //   跳转地址
+          url: "/pages/banner/ggzz/index"
+        }, {
+          // 图片名
+          fileName: "zbmm.png",
+          //   跳转地址
+          url: "/pages/banner/zbmm/index"
         }
       ],
       title: 'Hello'
@@ -79,14 +101,25 @@ export default {
   },
   methods: {
     ...mapMutations('store_user', ['updateToken', 'get_user_address']),
+
+    // 按下banner
+    banner_click(index) {
+      const item = this.bannerData[index]
+      item.url && uni.navigateTo({
+        url: item.url
+      })
+
+    },
     //  用于转发到其他功能上面。
     fun_run(data) {
       //  打开页面
-      const url = `/pages/${data.url}/index`
-      data.url && uni.navigateTo({url})
-      console.log("url是：", url)
+      if (data.url) {
+        const url = `/pages/${data.url}/index`
+        data.url && uni.navigateTo({url})
+        console.log("url是：", url)
+      }
       //  有单独条件就执行单独条件
-      this[data.icon] && this[data.icon]()
+      data.fun && data.fun()
     },
   },
   mounted() {
@@ -96,7 +129,6 @@ export default {
 </script>
 
 <style lang="scss">
-@import url('@/static/index/iconfont/iconfont.css');
 
 
 .content {

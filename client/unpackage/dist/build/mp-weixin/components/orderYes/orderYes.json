@@ -1,0 +1,7 @@
+{
+  "usingComponents": {
+    "order_card_kd": "/components/order_card_kd/order_card_kd",
+    "order_card_shop": "/components/order_card_shop/order_card_shop"
+  },
+  "component": true
+}

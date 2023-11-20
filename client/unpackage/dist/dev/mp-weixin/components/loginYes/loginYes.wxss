@@ -11,63 +11,64 @@
 /* 垂直间距 */
 /* 透明度 */
 /* 文章场景相关 */
-.loginYes {
-  background: #1FA2FF;
-  /* Chrome 10-25, Safari 5.1-6 */
-  background: linear-gradient(to right, #A6FFCB, #12D8FA, #1FA2FF);
-  /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
-}
-.loginYes .top_ {
-  padding-top: 30px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 325rpx;
-}
-.loginYes .top_ .box {
-  border-radius: 5px;
-  position: relative;
+.default.data-v-1fee9fc4 {
   background-color: #fff;
-  height: 85%;
-  width: 95%;
+  padding: 0;
+  line-height: normal;
 }
-.loginYes .top_ .box .top {
+.data-v-1fee9fc4::after {
+  border: none;
+}
+.view.data-v-1fee9fc4 {
+  height: 100vh;
+  background: linear-gradient(to bottom, #f48572, #f4f5f5 50%, #f4f5f5 100%);
+  box-sizing: border-box;
+  padding: 15px;
+}
+.loginYes .card.data-v-1fee9fc4 {
+  background-color: #fff;
+  box-sizing: border-box;
+  padding: 15px;
+  border-radius: 3px;
+  margin: 15px 0;
+}
+.loginYes .user_info.data-v-1fee9fc4 {
+  margin-top: 10vh;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
   align-items: center;
-  position: relative;
-  -webkit-transform: translateY(-35%);
-          transform: translateY(-35%);
 }
-.loginYes .top_ .box .top .head {
-  margin-bottom: 5px;
+.loginYes .user_info .head_img.data-v-1fee9fc4 {
+  flex: 2;
   border-radius: 50%;
-  width: 150rpx;
-  height: 150rpx;
-  box-shadow: 5px 5px 20px 0px #423f3f;
 }
-.loginYes .top_ .box .bottom {
-  background-color: red;
-}
-.loginYes .bottom_ {
-  padding-top: 15px;
-  background-color: white;
-  border-top-left-radius: 15px;
-  border-top-right-radius: 15px;
+.loginYes .user_info .name.data-v-1fee9fc4 {
+  flex: 8;
+  font-size: 40rpx;
+  box-sizing: border-box;
+  padding-left: 30rpx;
   overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-.loginYes .bottom_ .item {
-  padding: 10px 0;
-  margin: 0 15px;
-  border-top: 0.1px solid #8f8f94;
-  display: flex;
-}
-.loginYes .bottom_ .item .left {
-  flex: 1;
+.loginYes .shortcut_function .container_ .title.data-v-1fee9fc4 {
+  font-size: 32rpx;
   font-weight: bold;
 }
-.loginYes .bottom_ .item .rigth {
+.loginYes .shortcut_function .container_ .item.data-v-1fee9fc4 {
+  font-size: 30rpx;
+  padding: 10px 0;
+  border-top: 1px solid #eff1f0;
+  display: flex;
+}
+.loginYes .shortcut_function .container_ .item .left.data-v-1fee9fc4 {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+.loginYes .shortcut_function .container_ .item .left .iconfont.data-v-1fee9fc4 {
+  margin-right: 3px;
+}
+.loginYes .shortcut_function .container_ .item .rigth.data-v-1fee9fc4 {
   text-align: right;
   flex: 1;
 }

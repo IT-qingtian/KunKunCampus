@@ -5,9 +5,9 @@ import user from '@/store/user.js'
 Vue.use(Vuex)
 
 const store = new Vuex.Store({
-	modules: {
-		'store_user': user
-	}
+    modules: {
+        'store_user': user
+    }
 })
 
 export default store

@@ -1,6 +1,11 @@
 export default {
     namespaced: true,
     state: {
+        // 宿舍性别分组
+        dorm_sex_group: {
+            man: [],
+            girl: [],
+        },
         //  用户token
         token: uni.getStorageSync('token') || '',
         //  测试用的信息
@@ -21,16 +26,10 @@ export default {
         //     ]
         // },
         //  用户信息
-        userInfo: {name: '擎天大佬', address: []},
+        userInfo: {name: '尊敬的用户', address: []},
+        service_fee: {},
         //  订阅消息id
-        subscribeMessages_templIDs: [
-            // //  抢单提醒
-            // 'wD7ILVRlfivhxTQpLG35A2jhELJHaxRiGMbAY7QLOHk',
-            // //  下单成功提醒
-            // '6noRpLYC3O78mFA8xMfT_hOnFmSasUsSMD6SX-rfyWQ',
-            // //  订单送达
-            // 'un0JonFq4NTn7yLMux4o8OBtmfYUEFz2pBP6vVf6ZrE'
-        ],
+        subscribeMessages_templIDs: [],
         //  功能模块
         function: {
             //  快递
@@ -44,6 +43,11 @@ export default {
     },
 
     mutations: {
+        update_dorm_sex_group: (state, group) => {
+            const {man, girl} = group
+            state.dorm_sex_group.man = man ?? []
+            state.dorm_sex_group.gril = girl ?? []
+        },
         //  更新token信息
         updateToken: (state, tokenValue) => {
             state.token = tokenValue
@@ -52,6 +56,11 @@ export default {
         //  更新用户信息
         updateUserInfo: (state, userInfo) => {
             state.userInfo = userInfo
+        },
+        // 更新服务费用
+        updateServiceFee(state, service_fee) {
+            state.service_fee = service_fee
+            console.log(state.service_fee)
         },
         //  增加用户地址
         add_address: (state, addressObj) => {
@@ -62,7 +71,7 @@ export default {
             state.subscribeMessages_templIDs = subscribeMessages_templIDs
         },
         // 获取用户地址
-        async get_user_address(state) {
+        async get_user_address(state, hidden_err) {
             // 给服务器发起请求 索要用户地址
             const {data: {code, data, msg, err}} = await uni.$httpRequest({
                 url: 'user/user_address',
@@ -72,10 +81,13 @@ export default {
                     'Authorization': `Bearer ${state.token}`
                 },
             })
-            if (!code) return uni.showToast({
-                title: msg,
-                icon: "error"
-            })
+            if (!code) {
+                !hidden_err && uni.showToast({
+                    title: msg,
+                    icon: "error"
+                })
+                return
+            }
             // 更新地址
             state.userInfo.address = data.address
         },

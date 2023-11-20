@@ -4,7 +4,8 @@
     <div class="ns">
       <uni-easyinput v-model="search_value" prefixIcon="clear" suffixIcon="search"
                      placeholder="在这里可以搜店铺或物品哦~"
-                     @iconClick="search">
+                     @change="search_enter"
+                     @iconClick="icon_click">
       </uni-easyinput>
       <!--        导航-->
       <div class="nav">
@@ -22,7 +23,10 @@
             :key="index"
             :class="{select_sort:index === sort_selected}"
             @click="clickSort(index)"
-        >{{ item.text }}
+        >
+          <text>
+            {{ item.text }}
+          </text>
         </uni-card>
       </div>
     </div>
@@ -106,26 +110,46 @@ export default {
     clickSort(i) {
       this.sort_selected = i
       //   根据当前选择项来执行
+      console.log(i, 'lksadjlkasjdkl')
       this.sort[this.sort_selected].fun && this.sort[this.sort_selected].fun()
 
       //   本地更新偏好
       uni.setStorageSync('sort_preference', i)
     },
-    search(e) {
-      const keyString = this.search_value
-      // 还原
+    search_enter() {
+      // 根据内容判定应该搜索还是清空
+      const keyString = this.search_value.trim()
+      // 当前全部
       this.clickSort(this.sort_selected)
 
-      if (e === 'suffix' && keyString) {
-        //   搜索
-        const regexp = new RegExp(`"name":".*${keyString}.*"`)
-        this.shopData_render = this.shopData_render.filter(item => {
-          return item.title.includes(keyString) || regexp.test(JSON.stringify(item.goods)) || item.tags.includes(keyString)
-        })
+      if (keyString) {
+        if (keyString.length < 2) return uni.showToast({title: '请至少输入两个字符', icon: "error"})
+        this.search(keyString)
       } else {
         // 叉掉
         this.search_value = ''
       }
+    },
+    icon_click(e) {
+      const keyString = this.search_value.trim()
+      // 当前全部
+      this.clickSort(this.sort_selected)
+
+      if (e === 'suffix' && keyString) {
+        if (keyString === '') return uni.showToast({title: '请先输入搜索内容', icon: "error"})
+        if (keyString.length < 2) return uni.showToast({title: '请至少输入两个字符', icon: "error"})
+        this.search(keyString)
+      } else {
+        // 叉掉
+        this.search_value = ''
+      }
+    },
+    search(keyString) {
+      //   搜索
+      const regexp = new RegExp(`"name":".*${keyString}.*"`)
+      this.shopData_render = this.shopData_render.filter(item => {
+        return item.title.includes(keyString) || regexp.test(JSON.stringify(item.goods)) || item.tags.includes(keyString)
+      })
     },
     async navClick(item, index) {
       const {id} = item
@@ -144,8 +168,8 @@ export default {
       // 错误判定
       if (!code) return uni.$showMsg(msg)
       this.shopData = data.result
-      // 渲染
-      this.clickSort(uni.getStorageSync('sort_preference') ?? 0)
+      const sort_preference = uni.getStorageSync('sort_preference')
+      this.clickSort(sort_preference ? sort_preference : 0)
     }
   },
   mounted() {
@@ -211,8 +235,23 @@ export default {
     //  筛选
     .sort {
       .select_sort {
-        color: black;
+        //强制修改颜色
         font-weight: bold;
+
+        text {
+          //  黑色加粗
+          font-weight: bold;
+          color: black;
+          font-size: 29rpx !important;
+        }
+      }
+
+      text {
+        //  过度
+        transition: all 0.5s;
+        //灰色·
+        color: #999;
+        font-size: 25rpx !important;;
       }
 
       display: flex;

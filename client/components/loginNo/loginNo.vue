@@ -2,7 +2,8 @@
   <view class="content">
     <!-- 头像区 -->
     <view class='header'>
-      <image class='headImg' src='../../static/my/head.jpg'></image>
+      <!--      <image class='headImg' src='../../static/my/head.jpg'></image>-->
+      <image class='headImg' src='../../static/public/imgs/headImg.png'></image>
       <text>坤坤校园</text>
 
     </view>
@@ -14,6 +15,8 @@
         <text>申请获得权限，以此登陆小程序使用服务。</text>
         <br>
         <text>一个只为自贡职业技术学院服务的小程序。</text>
+        <br>
+        <text></text>
       </view>
     </view>
   </view>

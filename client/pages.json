@@ -19,6 +19,7 @@
     {
       "path": "pages/my/index",
       "style": {
+        "navigationStyle": "custom",
         "navigationBarTitleText": "我的"
       }
     },
@@ -67,7 +68,7 @@
     {
       "path": "pages/fun_kuaidi/index",
       "style": {
-        "navigationBarTitleText": "代取快递"
+        "navigationBarTitleText": "快递服务"
       }
     },
     {
@@ -87,6 +88,18 @@
       "path": "pages/appraise/index",
       "style": {
         "navigationBarTitleText": "评论"
+      }
+    },
+    {
+      "path": "pages/banner/zbmm/index",
+      "style": {
+        "navigationBarTitleText": "招兵买马页面"
+      }
+    },
+    {
+      "path": "pages/banner/ggzz/index",
+      "style": {
+        "navigationBarTitleText": "广告招租页面"
       }
     }
   ],

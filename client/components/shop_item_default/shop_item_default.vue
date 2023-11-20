@@ -10,7 +10,7 @@
       <div class="right">
         <!--商店标题-->
         <div class="shop_title">
-          {{ in_business ? '' : '(已打样)' + componentData.title }}
+          {{ (in_business ? '' : '(已打样)') + componentData.title }}
         </div>
 
         <!--商店信息-->
@@ -22,12 +22,15 @@
               <span class="sales_volume">月销量：{{ componentData.sales_volume }}单</span>
             </div>
             <span class="amount">
-                            每单平均消费：{{
-                isNaN(parseFloat(componentData.amount / componentData.sales_volume).toFixed(2)) ? 0 : parseFloat(componentData.amount / componentData.sales_volume).toFixed(2)
+<!--                            每单平均消费：{{-->
+              <!--                isNaN(parseFloat(componentData.amount / componentData.sales_volume).toFixed(2)) ? 0 : parseFloat(componentData.amount / componentData.sales_volume).toFixed(2)-->
+              <!--              }}元-->
+              每单平均消费：{{
+                (componentData.amount / componentData.sales_volume).toFixed(2)
               }}元
                         </span>
             <!--起送金额-->
-            <span class="start_run_price">起送金额：{{ componentData.start_run_price }}元</span>
+            <span class="mdp">起送金额：{{ componentData.mdp }}元</span>
             <!--            标签-->
             <view class="tags">
               <view class="tag"
@@ -40,7 +43,7 @@
             </view>
             <!--公告-->
             <div>
-              <text v-if="componentData.notice" class="notice">{{ componentData.notice }}</text>
+              <text v-if="componentData.notice" class="notice">{{ componentData.notice.replaceAll('\n', '') }}</text>
             </div>
           </div>
         </div>
@@ -70,11 +73,14 @@ export default {
   },
   mounted() {
     console.log(this.componentData)
+    console.log(this.componentData.title)
     //   判定是否处于营业时间
     const dt = new Date();
-    const {start_time, end_time} = this.componentData;
+    const {start_time, end_time, trade_time} = this.componentData;
     const currentTime = `${String(dt.getHours()).padStart(2, '0')}:${String(dt.getMinutes()).padStart(2, '0')}`;
-    if (currentTime >= start_time && currentTime <= end_time) this.in_business = true;
+    const currentDay = dt.getDay();
+    if (currentTime >= start_time && currentTime <= end_time && trade_time[currentDay]) this.in_business = true;
+    // console.log(this.in_business, 'this.in_business')
   }
 }
 </script>

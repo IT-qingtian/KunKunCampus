@@ -101,10 +101,10 @@ var components
 try {
   components = {
     orderYes: function () {
-      return __webpack_require__.e(/*! import() | components/orderYes/orderYes */ "components/orderYes/orderYes").then(__webpack_require__.bind(null, /*! @/components/orderYes/orderYes.vue */ 289))
+      return __webpack_require__.e(/*! import() | components/orderYes/orderYes */ "components/orderYes/orderYes").then(__webpack_require__.bind(null, /*! @/components/orderYes/orderYes.vue */ 300))
     },
     orderNo: function () {
-      return __webpack_require__.e(/*! import() | components/orderNo/orderNo */ "components/orderNo/orderNo").then(__webpack_require__.bind(null, /*! @/components/orderNo/orderNo.vue */ 296))
+      return __webpack_require__.e(/*! import() | components/orderNo/orderNo */ "components/orderNo/orderNo").then(__webpack_require__.bind(null, /*! @/components/orderNo/orderNo.vue */ 307))
     },
   }
 } catch (e) {
@@ -128,7 +128,7 @@ var render = function () {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  var g0 = _vm.orderList.length
+  var g0 = _vm.orderList_render.length
   _vm.$mp.data = Object.assign(
     {},
     {
@@ -186,87 +186,17 @@ function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { va
 var _default = {
   data: function data() {
     return {
-      select: 0,
-      orderList: []
-      // orderList: [
-      //   {
-      //     //  商店名
-      //     shop_title: "擎天科技",
-      //     //  预图片
-      //     img_address: "",
-      //     //  物品名
-      //     goods_title: '代取快递',
-      //     //  物品描述
-      //     goods_describe: '代取快递，送至6412代取快递，送至6412代取快递，送至6412代取快递，送至6412代取快递，送至6412代取快递，送至6412',
-      //   },
-      //   {
-      //     //  商店名
-      //     shop_title: "小马只运科技",
-      //     //  预图片
-      //     img_address: "",
-      //     //  物品名
-      //     goods_title: '送餐',
-      //     //  物品描述
-      //     goods_describe: '代取快递，阿斯利康的就',
-      //   },
-      //   {
-      //     //  商店名
-      //     shop_title: "小马只运科技",
-      //     //  预图片
-      //     img_address: "",
-      //     //  物品名
-      //     goods_title: '送餐',
-      //     //  物品描述
-      //     goods_describe: '代取快递，阿斯利康的就',
-      //   },
-      //   {
-      //     //  商店名
-      //     shop_title: "小马只运科技",
-      //     //  预图片
-      //     img_address: "",
-      //     //  物品名
-      //     goods_title: '送餐',
-      //     //  物品描述
-      //     goods_describe: '代取快递，阿斯利康的就',
-      //   },
-      //   {
-      //     //  商店名
-      //     shop_title: "小马只运科技",
-      //     //  预图片
-      //     img_address: "",
-      //     //  物品名
-      //     goods_title: '送餐',
-      //     //  物品描述
-      //     goods_describe: '代取快递，阿斯利康的就',
-      //   },
-      //   {
-      //     //  商店名
-      //     shop_title: "小马只运科技",
-      //     //  预图片
-      //     img_address: "",
-      //     //  物品名
-      //     goods_title: '送餐',
-      //     //  物品描述
-      //     goods_describe: '代取快递，阿斯利康的就',
-      //   },
-      //   {
-      //     //  商店名
-      //     shop_title: "最后一项",
-      //     //  预图片
-      //     img_address: "",
-      //     //  物品名
-      //     goods_title: '送餐',
-      //     //  物品描述
-      //     goods_describe: '代取快递，阿斯利康的就',
-      //   },
-      // ],
+      selectType: 0,
+      // 原始数据
+      orderList: [],
+      // 渲染数据
+      orderList_render: []
     };
   },
-
   methods: _objectSpread(_objectSpread({}, (0, _vuex.mapMutations)('store_user', ['updateToken'])), {}, {
     select_order: function select_order(index) {
       //  选择模式
-      this.select = index;
+      this.selectType = index;
       //  刷新订单数据
       uni.startPullDownRefresh();
     },
@@ -283,8 +213,10 @@ var _default = {
                   url: "orders/orderGet",
                   method: "post",
                   data: {
-                    getType: _this.select
+                    getType: 0
+                    // getType: this.select
                   },
+
                   header: {
                     Authorization: "Bearer ".concat(_this.token)
                   }
@@ -299,23 +231,83 @@ var _default = {
                 uni.stopPullDownRefresh();
                 //   判定消息
                 if (code) {
-                  _context.next = 12;
+                  _context.next = 11;
                   break;
                 }
-                // 如果没有密钥 那就清空token
-                if (msg === '身份密钥不存在！') _this.updateToken('');
                 return _context.abrupt("return", uni.$showMsg(msg));
-              case 12:
+              case 11:
                 // 植入数据(并且翻转)
                 _this.orderList = data.reverse();
-                console.log(data, '数据');
-              case 14:
+                console.log('请求回来的数据数据：', _this.orderList, _this.selectType);
+                //   匹配查看类型
+                _context.t0 = _this.selectType;
+                _context.next = _context.t0 === 0 ? 16 : _context.t0 === 1 ? 18 : _context.t0 === 2 ? 20 : _context.t0 === 3 ? 22 : _context.t0 === 4 ? 24 : _context.t0 === 5 ? 26 : 28;
+                break;
+              case 16:
+                // 全部
+                _this.orderList_render = _this.get_all();
+                return _context.abrupt("break", 28);
+              case 18:
+                //待支付
+                _this.orderList_render = _this.get_wait_pay();
+                return _context.abrupt("break", 28);
+              case 20:
+                //待接单
+                _this.orderList_render = _this.get_await_receving();
+                return _context.abrupt("break", 28);
+              case 22:
+                //处理中
+                _this.orderList_render = _this.get_processing();
+                return _context.abrupt("break", 28);
+              case 24:
+                //已完成
+                _this.orderList_render = _this.get_completed();
+                return _context.abrupt("break", 28);
+              case 26:
+                //待评价
+                _this.orderList_render = _this.get_comment();
+                return _context.abrupt("break", 28);
+              case 28:
               case "end":
                 return _context.stop();
             }
           }
         }, _callee);
       }))();
+    },
+    // 获取全部
+    get_all: function get_all() {
+      return this.orderList;
+    },
+    // 待支付
+    get_wait_pay: function get_wait_pay() {
+      return this.orderList.filter(function (item) {
+        return item.payStatus === 0;
+      });
+    },
+    // 待接单
+    get_await_receving: function get_await_receving() {
+      return this.orderList.filter(function (item) {
+        return item.payStatus === 1 && item.orderStatus === 0;
+      });
+    },
+    // 处理中
+    get_processing: function get_processing() {
+      return this.orderList.filter(function (item) {
+        return item.payStatus === 1 && (item.type === 3 && item.orderStatus === 1 || item.type === 1 && [2, 3].includes(item.orderStatus));
+      });
+    },
+    // 已完成
+    get_completed: function get_completed() {
+      return this.orderList.filter(function (item) {
+        return item.payStatus === 1 && (item.type === 3 && [3, 4].includes(item.orderStatus) || item.type === 1 && [4, 5].includes(item.orderStatus));
+      });
+    },
+    // 待评价
+    get_comment: function get_comment() {
+      return this.orderList.filter(function (item) {
+        return item.payStatus === 1 && (item.type === 3 && item.orderStatus === 4 || item.type === 1 && item.orderStatus === 5) && !item.appraise;
+      });
     },
     change_max_height: function change_max_height() {
       //     获取container高度
@@ -331,10 +323,28 @@ var _default = {
       }).exec();
     }
   }),
-  computed: _objectSpread({}, (0, _vuex.mapState)('store_user', ['token'])),
+  computed: _objectSpread(_objectSpread({}, (0, _vuex.mapState)('store_user', ['token'])), {}, {
+    len_all: function len_all() {
+      return this.get_all().length;
+    },
+    len_wait_pay: function len_wait_pay() {
+      return this.get_wait_pay().length;
+    },
+    len_await_receving: function len_await_receving() {
+      return this.get_await_receving().length;
+    },
+    len_processing: function len_processing() {
+      return this.get_processing().length;
+    },
+    len_completed: function len_completed() {
+      return this.get_completed().length;
+    },
+    len_comment: function len_comment() {
+      return this.get_comment().length;
+    }
+  }),
   mounted: function mounted() {},
   onPullDownRefresh: function onPullDownRefresh() {
-    console.log('刷新订单');
     this.getOrderData();
   },
   onLoad: function onLoad() {

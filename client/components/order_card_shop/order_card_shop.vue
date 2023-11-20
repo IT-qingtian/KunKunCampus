@@ -2,8 +2,13 @@
   <view class="card_order">
     <!--服务、店铺名-->
     <div class="title">
-      <div class="name">店铺名称-1擎天d小店</div>
-      <u-text class='state' align="right" :text="order_state"></u-text>
+      <div class="name">{{ data.data.shop_title }}</div>
+      <div class="state">
+        <u-text align="right" :text="order_state"></u-text>
+      </div>
+    </div>
+    <div class="pay_time">
+      {{ order_time }}
     </div>
     <div class="bodyer">
       <div class="content" v-for="(goods,index) in goods_data_ls" :key="index">
@@ -39,9 +44,7 @@
     <div class="ellipsis" v-if="!show_all">已隐藏更多...</div>
     <div class="settlement">
       总记：￥{{
-        goods_data.reduce((total, goods) => {
-          return Number((total + goods.number * goods.price).toFixed(2))
-        }, 0)
+        data.total / 100
       }}
     </div>
     <div class="footer">
@@ -90,8 +93,9 @@ export default {
   },
   data() {
     return {
+      // 订单时间
+      order_time: '',
       serverAddress,
-      order_state: '',
       goods_data: [],
       goods_data_ls: [],
       // 是否显示全部内容   create的时候会赋值，然后再触发watch
@@ -99,7 +103,54 @@ export default {
     }
   },
   computed: {
-    ...mapState('store_user', ['token'])
+    ...mapState('store_user', ['token']),
+    order_state() {
+      // 订单状态，-1是取消订单 0是未支付，1是已支付，3是退款。
+      let text = '未知状态'
+      console.log(this.data)
+      switch (this.data.payStatus) {
+        case -1: {
+          text = '订单已取消'
+          break
+        }
+        case 0: {
+          text = '订单未支付'
+          break
+        }
+        case 1: {
+          switch (this.data.overStatus) {
+            case -1:
+              text = '已退款'
+              break
+            case 0:
+              text = '等待接单'
+              break
+            case 1:
+              text = '商家处理中'
+              break
+            case 2:
+              text = '等待配送中'
+              break
+            case 3:
+              text = '骑手配送中'
+              break
+            case 4:
+              if (this.data.data.take_goods_mode === 1) {
+                text = `请前往店铺自提【${this.data.data.take_goods_code}】`
+              } else {
+                text = '订单已送达'
+              }
+
+              break
+            case 5:
+              text = '订单已完结'
+              break
+          }
+          break
+        }
+      }
+      return text
+    }
   },
   methods: {
     // 催单
@@ -161,29 +212,13 @@ export default {
   created() {
     //   解析出商品数据
     console.log(this.data, '拿到的数据')
-    switch (this.data.overStatus) {
-      case -1:
-        this.order_state = '已退款'
-        break
-      case 0:
-        this.order_state = '等待接单'
-        break
-      case 1:
-        this.order_state = '商家处理中'
-        break
-      case 2:
-        this.order_state = '等待配送中'
-        break
-      case 3:
-        this.order_state = '骑手配送中'
-        break
-      case 4:
-        this.order_state = this.data.data.take_goods_mode === 1 ? '请前往店铺自提' : '配送已到达'
-        break
-      case 5:
-        this.order_state = '订单已完结'
-        break
+    // 订单时间
+    if (this.data.time_pay_order) {
+      const time = new Date(this.data.time_pay_order)
+      this.order_time = `${time.getFullYear()}-${time.getMonth() + 1}-${time.getDate()} ${time.getHours()}:${time.getMinutes()}`
+      // this.order_time = `${time.getUTCFullYear()}-${time.getUTCMonth() + 1}-${time.getUTCDate()} ${time.getUTCHours()}:${time.getUTCMinutes()}`
     }
+
     // 分解data
     const {goods, take_goods_mode} = this.data.data
     this.goods_data = goods
@@ -237,5 +272,11 @@ export default {
 
 .settlement {
   text-align: right;
+}
+
+.pay_time {
+  margin: 3px auto;
+  font-size: 20rpx;
+  color: grey;
 }
 </style>

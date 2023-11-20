@@ -101,19 +101,22 @@ var components
 try {
   components = {
     uSkeleton: function () {
-      return Promise.all(/*! import() | node-modules/uview-ui/components/u-skeleton/u-skeleton */[__webpack_require__.e("common/vendor"), __webpack_require__.e("node-modules/uview-ui/components/u-skeleton/u-skeleton")]).then(__webpack_require__.bind(null, /*! uview-ui/components/u-skeleton/u-skeleton.vue */ 324))
+      return Promise.all(/*! import() | node-modules/uview-ui/components/u-skeleton/u-skeleton */[__webpack_require__.e("common/vendor"), __webpack_require__.e("node-modules/uview-ui/components/u-skeleton/u-skeleton")]).then(__webpack_require__.bind(null, /*! uview-ui/components/u-skeleton/u-skeleton.vue */ 335))
     },
     uTag: function () {
-      return Promise.all(/*! import() | node-modules/uview-ui/components/u-tag/u-tag */[__webpack_require__.e("common/vendor"), __webpack_require__.e("node-modules/uview-ui/components/u-tag/u-tag")]).then(__webpack_require__.bind(null, /*! uview-ui/components/u-tag/u-tag.vue */ 332))
+      return Promise.all(/*! import() | node-modules/uview-ui/components/u-tag/u-tag */[__webpack_require__.e("common/vendor"), __webpack_require__.e("node-modules/uview-ui/components/u-tag/u-tag")]).then(__webpack_require__.bind(null, /*! uview-ui/components/u-tag/u-tag.vue */ 343))
     },
     uNumberBox: function () {
-      return Promise.all(/*! import() | node-modules/uview-ui/components/u-number-box/u-number-box */[__webpack_require__.e("common/vendor"), __webpack_require__.e("node-modules/uview-ui/components/u-number-box/u-number-box")]).then(__webpack_require__.bind(null, /*! uview-ui/components/u-number-box/u-number-box.vue */ 340))
+      return Promise.all(/*! import() | node-modules/uview-ui/components/u-number-box/u-number-box */[__webpack_require__.e("common/vendor"), __webpack_require__.e("node-modules/uview-ui/components/u-number-box/u-number-box")]).then(__webpack_require__.bind(null, /*! uview-ui/components/u-number-box/u-number-box.vue */ 351))
     },
     uIcon: function () {
-      return Promise.all(/*! import() | node-modules/uview-ui/components/u-icon/u-icon */[__webpack_require__.e("common/vendor"), __webpack_require__.e("node-modules/uview-ui/components/u-icon/u-icon")]).then(__webpack_require__.bind(null, /*! uview-ui/components/u-icon/u-icon.vue */ 348))
+      return Promise.all(/*! import() | node-modules/uview-ui/components/u-icon/u-icon */[__webpack_require__.e("common/vendor"), __webpack_require__.e("node-modules/uview-ui/components/u-icon/u-icon")]).then(__webpack_require__.bind(null, /*! uview-ui/components/u-icon/u-icon.vue */ 359))
     },
     uAvatar: function () {
-      return Promise.all(/*! import() | node-modules/uview-ui/components/u-avatar/u-avatar */[__webpack_require__.e("common/vendor"), __webpack_require__.e("node-modules/uview-ui/components/u-avatar/u-avatar")]).then(__webpack_require__.bind(null, /*! uview-ui/components/u-avatar/u-avatar.vue */ 357))
+      return Promise.all(/*! import() | node-modules/uview-ui/components/u-avatar/u-avatar */[__webpack_require__.e("common/vendor"), __webpack_require__.e("node-modules/uview-ui/components/u-avatar/u-avatar")]).then(__webpack_require__.bind(null, /*! uview-ui/components/u-avatar/u-avatar.vue */ 368))
+    },
+    uRate: function () {
+      return Promise.all(/*! import() | node-modules/uview-ui/components/u-rate/u-rate */[__webpack_require__.e("common/vendor"), __webpack_require__.e("node-modules/uview-ui/components/u-rate/u-rate")]).then(__webpack_require__.bind(null, /*! uview-ui/components/u-rate/u-rate.vue */ 376))
     },
   }
 } catch (e) {
@@ -142,9 +145,8 @@ var render = function () {
   var g2 = _vm.shopData.goods.length
   var g3 = _vm.shopData.goods.length
   var g4 =
-    !!_vm.place_order_price &&
-    _vm.place_order_price < _vm.shopData.start_run_price
-      ? Math.round((_vm.shopData.start_run_price - _vm.place_order_price) * 100)
+    !!_vm.place_order_price && _vm.place_order_price < _vm.shopData.mdp
+      ? Math.round((_vm.shopData.mdp - _vm.place_order_price) * 100)
       : null
   var g5 = _vm.shopData.comment.length
   var l0 =
@@ -317,6 +319,22 @@ var _default = {
     }
   }),
   methods: _objectSpread(_objectSpread({}, (0, _vuex.mapMutations)('store_user', ['update_temp_data'])), {}, {
+    // 获取营业周期
+    get_trade_cycle: function get_trade_cycle() {
+      var text = '';
+      var trade_time = this.shopData.trade_time;
+      trade_time[1] && (text += '周一、');
+      trade_time[2] && (text += '周二、');
+      trade_time[3] && (text += '周三、');
+      trade_time[4] && (text += '周四、');
+      trade_time[5] && (text += '周五、');
+      trade_time[6] && (text += '周六、');
+      trade_time[0] && (text += '周日');
+      return text;
+    },
+    loadCoommentErr: function loadCoommentErr(e) {
+      e.img = null;
+    },
     showImg: function showImg(address) {
       this.imgShow.address = address;
       this.imgShow.is = true;
@@ -392,6 +410,7 @@ var _default = {
                   }
                 });
                 _this3.shopData = data.result;
+                _this3.shopData.comment.reverse();
                 _this3.loading = false;
                 console.log(_this3.shopData, '格式化以后的店铺数据');
                 _this3.is_business();
@@ -400,7 +419,7 @@ var _default = {
                 _this3.$nextTick(function () {
                   _this3.view_init();
                 });
-              case 16:
+              case 17:
               case "end":
                 return _context2.stop();
             }
@@ -413,11 +432,15 @@ var _default = {
       var dt = new Date();
       var _this$shopData = this.shopData,
         start_time = _this$shopData.start_time,
-        end_time = _this$shopData.end_time;
+        end_time = _this$shopData.end_time,
+        trade_time = _this$shopData.trade_time;
       var currentTime = "".concat(String(dt.getHours()).padStart(2, '0'), ":").concat(String(dt.getMinutes()).padStart(2, '0'));
-      if (!(currentTime >= start_time && currentTime <= end_time)) {
+
+      // 判断今天是否是工作日
+      var day_ = new Date().getDay();
+      if (!(currentTime >= start_time && currentTime <= end_time && trade_time[day_])) {
         uni.showToast({
-          title: "店家已打样~",
+          title: "店家已打样，无法点餐了",
           icon: "error"
         });
         return false;
@@ -429,7 +452,7 @@ var _default = {
     click_place_order: function click_place_order() {
       var _this4 = this;
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee3() {
-        var goods, goods_, _yield$uni$$httpReque3, _yield$uni$$httpReque4, code, data, msg, payInfo, subscribeMessageArray;
+        var goods, goods_, _yield$uni$$httpReque3, _yield$uni$$httpReque4, code, data, msg, out_trade_no, subscribeMessageArray;
         return _regenerator.default.wrap(function _callee3$(_context3) {
           while (1) {
             switch (_context3.prev = _context3.next) {
@@ -495,15 +518,14 @@ var _default = {
                 code = _yield$uni$$httpReque4.code;
                 data = _yield$uni$$httpReque4.data;
                 msg = _yield$uni$$httpReque4.msg;
-                console.log(data, msg, code);
                 _this4.place_order_ing = false;
                 if (code) {
-                  _context3.next = 22;
+                  _context3.next = 21;
                   break;
                 }
                 return _context3.abrupt("return", uni.$showMsg(msg));
-              case 22:
-                payInfo = data.payInfo, subscribeMessageArray = data.subscribeMessageArray; // 授权订阅消息
+              case 21:
+                out_trade_no = data.out_trade_no, subscribeMessageArray = data.subscribeMessageArray; // 授权订阅消息
                 uni.requestSubscribeMessage({
                   tmplIds: subscribeMessageArray,
                   complete: function complete(res) {
@@ -512,11 +534,11 @@ var _default = {
                     // this.update_temp_data({pay: payInfo})
                     // 跳转页面的时候 携带订单号 以便页面去查询
                     uni.navigateTo({
-                      url: "/pages/fun_chaoshi/comfirm/index?out_trade_no=".concat(payInfo.out_trade_no)
+                      url: "/pages/fun_chaoshi/comfirm/index?out_trade_no=".concat(out_trade_no)
                     });
                   }
                 });
-              case 24:
+              case 23:
               case "end":
                 return _context3.stop();
             }

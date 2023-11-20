@@ -13,7 +13,9 @@
     "pages/fun_kuaidi/index",
     "pages/fun_kuaidi_use_user/index",
     "pages/fun_kuaidi_add_address/index",
-    "pages/appraise/index"
+    "pages/appraise/index",
+    "pages/banner/zbmm/index",
+    "pages/banner/ggzz/index"
   ],
   "subPackages": [],
   "window": {

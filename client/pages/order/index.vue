@@ -2,17 +2,29 @@
   <view class="container">
     <div class="tab">
       <scroll-view scroll-x="true">
-        <text class="tab_item" :class="select === 0? 'select':''" @click.stop="select_order(0)">全部</text>
-        <text class="tab_item" :class="select === 1? 'select':''" @click.stop="select_order(1)">待支付</text>
-        <text class="tab_item" :class="select === 2? 'select':''" @click.stop="select_order(2)">待接单</text>
-        <text class="tab_item" :class="select === 3? 'select':''" @click.stop="select_order(3)">处理中</text>
-        <text class="tab_item" :class="select === 4? 'select':''" @click.stop="select_order(4)">已完成</text>
-        <text class="tab_item" :class="select === 5? 'select':''" @click.stop="select_order(5)">待评价</text>
+        <text class="tab_item" :class="selectType=== 0? 'select':''" @click.stop="select_order(0)">
+          全部{{ len_all ? `(${len_all})` : '' }}
+        </text>
+        <text class="tab_item" :class="selectType=== 1? 'select':''" @click.stop="select_order(1)">
+          待支付{{ len_wait_pay ? `(${len_wait_pay})` : '' }}
+        </text>
+        <text class="tab_item" :class="selectType=== 2? 'select':''" @click.stop="select_order(2)">
+          待接单{{ len_await_receving ? `(${len_await_receving})` : '' }}
+        </text>
+        <text class="tab_item" :class="selectType=== 3? 'select':''" @click.stop="select_order(3)">
+          处理中{{ len_processing ? `(${len_processing})` : '' }}
+        </text>
+        <text class="tab_item" :class="selectType=== 4? 'select':''" @click.stop="select_order(4)">
+          已完成{{ len_completed ? `(${len_completed})` : '' }}
+        </text>
+        <text class="tab_item" :class="selectType=== 5? 'select':''" @click.stop="select_order(5)">
+          待评价{{ len_comment ? `(${len_comment})` : '' }}
+        </text>
       </scroll-view>
     </div>
     <div class="content">
-      <orderYes class="content_children" :orderList="orderList" @refresh_list='getOrderData'
-                v-if="orderList.length"></orderYes>
+      <orderYes class="content_children" :orderList="orderList_render" @refresh_list='getOrderData'
+                v-if="orderList_render.length"></orderYes>
       <orderNo class="content_children" v-else></orderNo>
     </div>
   </view>
@@ -24,87 +36,18 @@ import {mapState, mapMutations} from "vuex"
 export default {
   data() {
     return {
-      select: 0,
+      selectType: 0,
+      // 原始数据
       orderList: [],
-      // orderList: [
-      //   {
-      //     //  商店名
-      //     shop_title: "擎天科技",
-      //     //  预图片
-      //     img_address: "",
-      //     //  物品名
-      //     goods_title: '代取快递',
-      //     //  物品描述
-      //     goods_describe: '代取快递，送至6412代取快递，送至6412代取快递，送至6412代取快递，送至6412代取快递，送至6412代取快递，送至6412',
-      //   },
-      //   {
-      //     //  商店名
-      //     shop_title: "小马只运科技",
-      //     //  预图片
-      //     img_address: "",
-      //     //  物品名
-      //     goods_title: '送餐',
-      //     //  物品描述
-      //     goods_describe: '代取快递，阿斯利康的就',
-      //   },
-      //   {
-      //     //  商店名
-      //     shop_title: "小马只运科技",
-      //     //  预图片
-      //     img_address: "",
-      //     //  物品名
-      //     goods_title: '送餐',
-      //     //  物品描述
-      //     goods_describe: '代取快递，阿斯利康的就',
-      //   },
-      //   {
-      //     //  商店名
-      //     shop_title: "小马只运科技",
-      //     //  预图片
-      //     img_address: "",
-      //     //  物品名
-      //     goods_title: '送餐',
-      //     //  物品描述
-      //     goods_describe: '代取快递，阿斯利康的就',
-      //   },
-      //   {
-      //     //  商店名
-      //     shop_title: "小马只运科技",
-      //     //  预图片
-      //     img_address: "",
-      //     //  物品名
-      //     goods_title: '送餐',
-      //     //  物品描述
-      //     goods_describe: '代取快递，阿斯利康的就',
-      //   },
-      //   {
-      //     //  商店名
-      //     shop_title: "小马只运科技",
-      //     //  预图片
-      //     img_address: "",
-      //     //  物品名
-      //     goods_title: '送餐',
-      //     //  物品描述
-      //     goods_describe: '代取快递，阿斯利康的就',
-      //   },
-      //   {
-      //     //  商店名
-      //     shop_title: "最后一项",
-      //     //  预图片
-      //     img_address: "",
-      //     //  物品名
-      //     goods_title: '送餐',
-      //     //  物品描述
-      //     goods_describe: '代取快递，阿斯利康的就',
-      //   },
-      // ],
+      // 渲染数据
+      orderList_render: []
     }
   },
   methods: {
     ...mapMutations('store_user', ['updateToken']),
     select_order(index) {
       //  选择模式
-      this.select = index
+      this.selectType = index
       //  刷新订单数据
       uni.startPullDownRefresh()
     },
@@ -113,7 +56,8 @@ export default {
         url: "orders/orderGet",
         method: "post",
         data: {
-          getType: this.select
+          getType: 0
+          // getType: this.select
         },
         header: {
           Authorization: `Bearer ${this.token}`
@@ -122,15 +66,59 @@ export default {
       uni.stopPullDownRefresh()
       //   判定消息
       if (!code) {
-        // 如果没有密钥 那就清空token
-        if (msg === '身份密钥不存在！') this.updateToken('')
         return uni.$showMsg(msg)
       }
       // 植入数据(并且翻转)
       this.orderList = data.reverse()
-      console.log(data, '数据')
 
+      console.log('请求回来的数据数据：', this.orderList, this.selectType)
+      //   匹配查看类型
+      switch (this.selectType) {
+        case 0:// 全部
+          this.orderList_render = this.get_all()
+          break
+        case 1://待支付
+          this.orderList_render = this.get_wait_pay()
+          break
+        case 2://待接单
+          this.orderList_render = this.get_await_receving()
+          break
+        case 3://处理中
+          this.orderList_render = this.get_processing()
+          break
+        case 4://已完成
+          this.orderList_render = this.get_completed()
+          break
+        case 5://待评价
+          this.orderList_render = this.get_comment()
+          break
+      }
     },
+    // 获取全部
+    get_all() {
+      return this.orderList
+    },
+    // 待支付
+    get_wait_pay() {
+      return this.orderList.filter(item => item.payStatus === 0)
+    },
+    // 待接单
+    get_await_receving() {
+      return this.orderList.filter(item => item.payStatus === 1 && item.orderStatus === 0)
+    },
+    // 处理中
+    get_processing() {
+      return this.orderList.filter(item => item.payStatus === 1 && ((item.type === 3 && item.orderStatus === 1) || (item.type === 1 && [2, 3].includes(item.orderStatus))))
+    },
+    // 已完成
+    get_completed() {
+      return this.orderList.filter(item => item.payStatus === 1 && ((item.type === 3 && [3, 4].includes(item.orderStatus)) || (item.type === 1 && [4, 5].includes(item.orderStatus))))
+    },
+    // 待评价
+    get_comment() {
+      return this.orderList.filter(item => item.payStatus === 1 && ((item.type === 3 && item.orderStatus === 4) || (item.type === 1 && item.orderStatus === 5)) && !item.appraise)
+    },
+
     change_max_height() {
       //     获取container高度
       const query = wx.createSelectorQuery()
@@ -145,14 +133,33 @@ export default {
       query.select('.tab').boundingClientRect(e => {
         console.log('tab高度', e.height)
       }).exec()
-    }
-  },
-  computed: {...mapState('store_user', ['token'])},
-  mounted() {
+    },
 
   },
+  computed: {
+    ...mapState('store_user', ['token']),
+    len_all() {
+      return this.get_all().length
+    },
+    len_wait_pay() {
+      return this.get_wait_pay().length
+    },
+    len_await_receving() {
+      return this.get_await_receving().length
+    },
+    len_processing() {
+      return this.get_processing().length
+    },
+    len_completed() {
+      return this.get_completed().length
+    },
+    len_comment() {
+      return this.get_comment().length
+    }
+  },
+  mounted() {
+  },
   onPullDownRefresh() {
-    console.log('刷新订单')
     this.getOrderData()
   },
   onLoad() {

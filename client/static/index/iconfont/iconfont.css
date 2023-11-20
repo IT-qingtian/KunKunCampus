@@ -1,7 +1,7 @@
 @font-face {
     font-family: "iconfont"; /* Project id 3938087 */
     /* Color fonts */
-    src: url("~@/static/index/iconfont/iconfont.ttf");
+    src: url("~@/static/index/iconfont/iconfont.ttf") format("truetype");
 }
 
 .iconfont {
@@ -10,6 +10,30 @@
     font-style: normal;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-dizhiguanli:before {
+    content: "\e692";
+}
+
+.icon-tuichu:before {
+    content: "\e892";
+}
+
+.icon-guanyu:before {
+    content: "\e603";
+}
+
+.icon-rengongkefu:before {
+    content: "\e87c";
+}
+
+.icon-yuanquwaimaibeifen:before {
+    content: "\e72f";
+}
+
+.icon-a-Artboard81star-rate:before {
+    content: "\e61e";
 }
 
 .icon-rishi-riquanshi:before {

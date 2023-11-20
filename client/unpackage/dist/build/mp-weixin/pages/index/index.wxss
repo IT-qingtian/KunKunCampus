@@ -1,0 +1,1 @@
+.content{display:flex;flex-direction:column;align-items:center;justify-content:center}.content .swiper{width:750rpx}.content .swiper swiper-item image{width:750rpx;height:100%}.content .function{width:100%;display:flex;flex-wrap:wrap}.content .function .fun_item{box-sizing:border-box;width:33%;padding:5px 50rpx;text-align:center}.content .function .fun_item ._i{font-size:100rpx}

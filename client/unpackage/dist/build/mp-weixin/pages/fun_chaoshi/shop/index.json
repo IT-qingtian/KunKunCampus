@@ -1,0 +1,10 @@
+{
+  "navigationBarTitleText": "店铺详情",
+  "usingComponents": {
+    "u-skeleton": "/node-modules/uview-ui/components/u-skeleton/u-skeleton",
+    "u-tag": "/node-modules/uview-ui/components/u-tag/u-tag",
+    "u-number-box": "/node-modules/uview-ui/components/u-number-box/u-number-box",
+    "u-icon": "/node-modules/uview-ui/components/u-icon/u-icon",
+    "u-avatar": "/node-modules/uview-ui/components/u-avatar/u-avatar"
+  }
+}

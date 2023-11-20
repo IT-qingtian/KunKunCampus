@@ -2,37 +2,38 @@
   <view class="card_order">
     <!--服务、店铺名-->
     <div class="title">
-      <div class="name">坤坤校园</div>
+      <div class="name">取快递服务</div>
       <u-text class='state' align="right" :text="order_state"></u-text>
     </div>
     <div class="bodyer">
       <div class="content">
         <!--一般丢图片-->
         <div class="left">
-          我是图片
+          <i class="iconfont icon-kuaidi"></i>
+          <!--          我是图片-->
           <!--          <img :src="item.img_address" alt="加载失败">-->
         </div>
         <!--一般丢信息-->
         <div class="right">
           <!--商品标题-->
-          <div class="goods_title">{{ data.description }}</div>
+          <!--          <div class="goods_title">{{ data.description }}</div>-->
           <!--付款描述-->
           <div class="goods_describe">
             <text>
               下单人称呼：{{
-                `${data.data.user.name}${data.data.user.sex ? '先生' : '女士'}`
+                `${data.data.user.name}${dorm_sex_group.man.includes(data.data.user.numberPlate[0] - 0) ? '先生' : '女士'}`
               }}
             </text>
             <br>
             <text>下单人电话：{{ data.data.user.phoneCode }}</text>
             <br>
-            <text>下单人舍号：{{ data.data.user.numberPlate }}</text>
+            <text>下单人地址：{{ data.data.user.numberPlate }}</text>
             <br>
             <text>
-              取件编码：{{ data.data.code }}
+              货架编号：{{ data.data.code.shelf_number }}-{{ data.data.code.layer_number }}-{{ data.data.code.number }}
             </text>
             <br>
-            <text>订单留言： {{ data.data.remarks }}</text>
+            <text v-if="data.data.remarks">订单留言： {{ data.data.remarks }}</text>
           </div>
         </div>
       </div>
@@ -41,9 +42,10 @@
       <!--去支付-->
       <text v-if="data.payStatus==0" @click="order_pay(data.out_trade_no)">前往付款</text>
       <!--取消订单-->
-      <text v-if="data.overStatus == 0" @click="order_cancel(data.out_trade_no)">取消订单</text>
+      <text v-if="data.payStatus !== -1 &&data.overStatus == 0" @click="order_cancel(data.out_trade_no)">取消订单</text>
       <!--订单完成-->
-      <text v-if="data.overStatus==4" @click="order_over">确认结单</text>
+      <text v-if="data.overStatus==3" @click="order_over(data.out_trade_no)">确认结单</text>
+      <text v-if="order_state === '订单已取消'" @click="delete_order(data.out_trade_no)">删除订单</text>
     </div>
   </view>
 </template>
@@ -57,38 +59,50 @@ export default {
     data: {}
   },
   data() {
-    return {
-      // 订单状态
-      order_state: ''
-    }
+    return {}
   },
   computed: {
-    ...mapState('store_user', ['token'])
+    ...mapState('store_user', ['token', 'dorm_sex_group']),
+    // 订单状态
+    order_state() {
+      let text = ''
+      switch (this.data.payStatus) {
+        case -1: {
+          text = '订单已取消'
+          break
+        }
+        case 0: {
+          text = '订单未支付'
+          break
+        }
+        case 1: {
+          switch (this.data.overStatus) {
+            case -1:
+              text = '已退款'
+              break
+            case 0:
+              text = '等待接单'
+              break
+            case 1:
+              text = '取件中'
+              break
+            case 2:
+              text = '配送中'
+              break
+            case 3:
+              text = '已送达'
+              break
+            case 4:
+              text = '订单已完结'
+              break
+          }
+          break
+        }
+      }
+      return text
+    }
   },
   created() {
-    switch (this.data.overStatus) {
-      case -1:
-        this.order_state = '已退款'
-        break
-      case 0:
-        this.order_state = '等待接单'
-        break
-      case 1:
-        this.order_state = '已接单，等待区间'
-        break
-      case 2:
-        this.order_state = '等待配送中'
-        break
-      case 3:
-        this.order_state = '骑手配送中'
-        break
-      case 4:
-        this.order_state = '已送达'
-        break
-      case 5:
-        this.order_state = '订单已完成'
-        break
-    }
   },
   methods: {
     // 前往付款
@@ -122,15 +136,13 @@ export default {
           // 订单查询
           const {data: result_qeury_data} = await uni.$httpRequest({
             //  查询快递
-            url: "orders/orderQuery",
+            url: "kd/order_query",
             method: "post",
             header: {
               authorization: "bearer " + this.token,
             },
             data,
           });
-          console.log(result_qeury_data);
-          if (!result_qeury_data.code) return uni.$showMsg(result_qeury_data.msg)
           //  告诉父组件刷新
           this.$emit("refresh_list")
         },
@@ -155,22 +167,71 @@ export default {
             data: {out_trade_no}
           })
           if (!code) return uni.$showMsg(msg)
+          uni.showToast({
+            title: msg,
+            icon: "success",
+            duration: 2000
+          })
+          // setTimeout(() => {
           //  告诉父组件刷新
           this.$emit("refresh_list")
+          // }, 2000)
         }
       })
 
     },
     // 确认结单
-    order_over() {
+    async order_over(out_trade_no) {
+      const {data: {code, msg}} = await uni.$httpRequest({
+        url: "kd/end_order",
+        method: "post",
+        header: {
+          Authorization: `bearer ${this.token}`
+        },
+        data: {out_trade_no}
+      })
+      if (!code) return uni.showToast({title: msg, icon: "error"})
+      //  告诉父组件刷新
+      this.$emit("refresh_list")
     },
+    //   删除订单
+    async delete_order(out_trade_no) {
+      // 确定删除订单
+      uni.showModal({
+        content: "确定取消订单？",
+        showCancel: true,
+        success: async (res) => {
+          if (!res.confirm) return
+          const {data: {code, msg}} = await uni.$httpRequest({
+            url: "kd/delete_order",
+            method: "post",
+            header: {
+              Authorization: `bearer ${this.token}`
+            },
+            data: {out_trade_no}
+          })
+          if (!code) return uni.showToast({title: msg, icon: "error"})
+          //  告诉父组件刷新
+          this.$emit("refresh_list")
+        }
+      })
+    }
   },
   mounted() {
   }
 }
 </script>
 
-<style scoped>
-@import url("@/static/public/css/order_card.css");
+<style scoped lang="scss">
+@import url('@/static/public/css/order_card.css');
 
+.left {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  i {
+    font-size: 150rpx;
+  }
+}
 </style>
