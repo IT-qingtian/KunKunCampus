@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import {onMounted, reactive, ref} from "vue";
 import {onLoad} from "@dcloudio/uni-app";
-import {run_get_orders, run_receving_order, run_update_order_state} from "@/server";
+import {run_get_orders, run_kd_grabbing, run_update_order_state_kd} from "@/server";
 
 const update_order_state = async (out_trade_no: string) => {
     console.log('修改订单状态')
     // 如果 还没接单的情况下 就接单 否则就更新订单状态
-    const r = time_line_select_index.value === 0 ? await run_receving_order(out_trade_no) : await run_update_order_state(out_trade_no)
-
+    const r = time_line_select_index.value === 0 ? await run_kd_grabbing(out_trade_no) : await run_update_order_state_kd(out_trade_no)
 
     // 是否接单成功
     uni.showToast({
@@ -34,18 +33,14 @@ let time_line_select_index = ref(0)
 
 const activities = [
     {
-        content: '接收订单',
+        content: '接下订单',
         timestamp: '',
     }, {
-        content: '商家正在出单中……',
+        content: '前往取件',
         timestamp: '',
     },
     {
-        content: '商家出单完成，开始配送',
-        timestamp: '',
-    },
-    {
-        content: '配送中',
+        content: '配送订单',
         timestamp: '',
     },
     {
@@ -63,7 +58,9 @@ const back = (title: string) => {
     uni.showToast({title, icon: 'error'})
     setTimeout(() => {
         // 之前是否有页j面
-        uni.navigateBack()
+        // uni.navigateBack()
+        //     回到主页
+        uni.navigateTo({url: "/pages/run/index"})
     }, 1000)
 }
 onLoad(async op => {
@@ -81,24 +78,23 @@ onLoad(async op => {
       订单是否完成
     -1 订单已退款。
     0未接单，
-    1是已接单（处理中），
-    2 等待配送
-    3 配送中
-    4 处理完毕（自提/配送完毕）
-    5 用户确认完成。
+    1 前往取件，
+    2 开始配送
+    3 配送到达
+    4 订单完成
   */
-
-    // time_line_select_index.value = data.order.order_over
+    time_line_select_index.value = data.order.order_over
     // 时间处理
-    activities[0].timestamp = data.order.receving_order_info.delivery_info?.start_receving_time
-    activities[1].timestamp = data.order.receving_order_info.shop_info?.receving_time
-    activities[2].timestamp = data.order.receving_order_info.shop_info?.dispatch_time
-    activities[3].timestamp = data.order.receving_order_info?.delivery_info?.receving_time
-    activities[4].timestamp = data.order.receving_order_info?.delivery_info?.dispatch_time
+    activities[0].timestamp = data.order.receving_order_info?.receving_time
+    activities[1].timestamp = data.order.receving_order_info?.receving_time
+    activities[2].timestamp = data.order.receving_order_info?.take_time
+    activities[3].timestamp = data.order.receving_order_info?.transport_time
+
     if (data.order.time_end_order) {
         const time = new Date(data.order.time_end_order)
         // 解析 xx-xx-xx x:x:x
-        activities[5].timestamp = `${time.getFullYear()}-${time.getMonth() + 1}-${time.getDate()} ${time.getHours()}:${time.getMinutes()}:${time.getSeconds()}`
+        console.log(time, ' ', data.order.time_end_order)
+        activities[4].timestamp = `${time.getFullYear()}-${time.getMonth() + 1}-${time.getDate()} ${time.getHours()}:${time.getMinutes()}:${time.getSeconds()}`
     }
 
     switch (data.order.order_over) {
@@ -117,30 +113,23 @@ onLoad(async op => {
         case 4:
             time_line_select_index.value = 4
             break
-        case 5:
-            time_line_select_index.value = 5
-            break
-    }
-//     如果没有接单方的信息那就归零
-    if (!data.order.receving_order_info.delivery_info) {
-        time_line_select_index.value = 0
     }
 })
 </script>
 
 <template>
     <div class="container">
-        <div class="type"># 取货送货</div>
+        <div class=""># 代取快递</div>
         <div class="info take">
             <div>
                 <div class="title">
-                    <p><i class="iconfont icon-EBC-shouye-weiwai-shengchanbaobiao"></i>{{ data.order.data.shop_title }}
+                    <p><i class="iconfont icon-EBC-shouye-weiwai-shengchanbaobiao"></i>菜鸟驿站
                         <span
                             style="font-size: 20px"></span></p>
                     <i class="iconfont icon-lianxi" @click="callPhone(data.order.data.shop_phone)"></i>
                 </div>
                 <div class="position">
-                    请前往：{{ data.order.data.shop_position }}
+                    请前往：快递代收点
                 </div>
             </div>
         </div>
@@ -148,16 +137,16 @@ onLoad(async op => {
         <div class="info deliver">
             <div>
                 <div class="title">
-                    <p><i class="iconfont icon-fasong"></i>{{ data.order.data.address?.name }} <span
+                    <p><i class="iconfont icon-fasong"></i>{{ data.order.data.user?.name }} <span
                         style="font-size: 20px">（{{
-                            data.order.data.address?.phoneCode
+                            data.order.data.user?.phoneCode
                         }}）</span>
                     </p>
                     <i class="iconfont icon-lianxi"
-                       @click="callPhone(data.order.data.address?.phoneCode)"></i>
+                       @click="callPhone(data.order.data.user?.phoneCode)"></i>
                 </div>
                 <div class="position">
-                    请送往：{{ data.order.data.address?.numberPlate }}
+                    请送往：{{ data.order.data.user?.numberPlate }}
                 </div>
             </div>
         </div>
@@ -191,7 +180,7 @@ onLoad(async op => {
                     {{ activity.content }}
                 </el-timeline-item>
             </el-timeline>
-            <div class="receving" v-if="data.order.order_over <4" @click="update_order_state(data.order.out_trade_no)">
+            <div class="receving" v-if="data.order.order_over <3" @click="update_order_state(data.order.out_trade_no)">
                 {{ time_line_select_index === 0 ? '确认接单' : '下一步' }}
             </div>
             <!--下一步-->

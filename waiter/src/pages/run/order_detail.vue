@@ -95,6 +95,11 @@ onLoad(async op => {
     activities[2].timestamp = data.order.receving_order_info.shop_info?.dispatch_time
     activities[3].timestamp = data.order.receving_order_info?.delivery_info?.receving_time
     activities[4].timestamp = data.order.receving_order_info?.delivery_info?.dispatch_time
+    if (data.order.time_end_order) {
+        const time = new Date(data.order.time_end_order)
+        // 解析 xx-xx-xx x:x:x
+        activities[5].timestamp = `${time.getFullYear()}-${time.getMonth() + 1}-${time.getDate()} ${time.getHours()}:${time.getMinutes()}:${time.getSeconds()}`
+    }
 
     switch (data.order.order_over) {
         case 1:

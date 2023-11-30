@@ -6,18 +6,20 @@ const path = require('path')
 const fs = require("fs");
 // 引入multiparty
 const multiparty = require('multiparty')
-
+const cfg = require('../configs')
 
 const {
     sendRes,
     sendErr,
     message_tempIds,
     emit_subscribe_msg,
+    notice_prepare_receving_order,
     formatTime,
     db_query,
     db_update,
     generateRandomNumber,
     TEMPORORAY_ADDRESS,
+    auto_end_order
 } = require('../function/public.js')
 
 
@@ -33,27 +35,33 @@ const order = require('../function/order.js')
 const receving_order = async (req, res) => {
     // 获取参数
     const {openid} = req
-    // 校验参数
-    if (!openid) return sendErr(res, '无法校验身份请重新登录')
+
     // 获取参数
-    const {out_trade_no, is_merchant_dispatch} = req.body
+    const {
+        out_trade_no,   //订单号
+        is_merchant_dispatch    //是否商户配送
+    } = req.body
     //  订单数据
     const order_result = await order.queryOrder(out_trade_no)
     // 校验订单
     const {code, data} = order_result
 
     if (!code) return sendErr(res, '订单不存在')
+
     // 解析data-这里是订单数据
-    let {status, order_over, openid: order_db_openid, data: order_data, total} = data
+    let {
+        status, order_over,
+        openid: order_db_openid,
+        data: order_data
+    } = data
 
     // 解析order_data
-    const {shop_id: data_shop_id, goods: data_goods, take_goods_mode: data_take_goods_mode} = order_data
+    const {shop_id: data_shop_id, goods: data_goods, take_goods_mode: data_take_goods_mode, address} = order_data
 
     // 获取商家信息
     const sql_query_boss = `select * from users_boss where openid = ?`
     const result_boss_info = await db_query(sql_query_boss, [openid])
     if (!result_boss_info.code) return sendErr(res, '接单失败，查询商家信息遇到报错。')
-    if (!result_boss_info.data.length) return sendErr(res, '接单失败，服务器查询不到商家信息。')
 
     // 最终商家信息
     const boss_info = result_boss_info.data[0]
@@ -76,13 +84,19 @@ const receving_order = async (req, res) => {
 
         //  修改接单状态
         const receving_order_info = `'${JSON.stringify({
+            // 商户信息
             shop_info: {
                 openid,
                 shop_id,
                 // 商户接单时间
                 receving_time: formatTime()
             },
-            is_merchant_dispatch
+            // 是否自主配送
+            is_merchant_dispatch,
+            //  自动完成完成订单
+            auto_end_order_limited_time: cfg.LIMITED_TIME.auto_end_order,
+            //  是否晚自动
+            is_later_auto: false
         })}'`
         const update_result = await order.updateOrder(out_trade_no, {order_over: 1, receving_order_info})
         // 判定状态
@@ -90,8 +104,16 @@ const receving_order = async (req, res) => {
 
         // 增加老板的审核金额
         const sql_add_reviewAmount = `update users_boss set reviewAmount = ? where shop_id = ?`
-        const result_update_boss = await db_update(sql_add_reviewAmount, [reviewAmount + total, shop_id])
+
+        // 商品钱
+        const goods_total = order_data.goods.reduce((total, item) => {
+            return total += item.price * 100 * item.number
+        }, 0)
+
+        const result_update_boss = await db_update(sql_add_reviewAmount, [reviewAmount + goods_total, shop_id])
         const {code, err} = result_update_boss
+
+
         if (!code) {
             console.log('增加审核金额失败 回退信息。')
             const update_result = await order.updateOrder(out_trade_no, {
@@ -108,7 +130,7 @@ const receving_order = async (req, res) => {
             // 接单时间
             // {{time2.DATA}}
             time2: {
-                value: formatTime(1)
+                value: formatTime()
             },
             // 服务类型
             // {{thing1.DATA}}
@@ -122,7 +144,16 @@ const receving_order = async (req, res) => {
             // 备注
             // {{thing4.DATA}}
             thing4: {value: '店铺已接单，正在处理中。'},
-        }, 2, '17xf.cq.cn', '商户已接单')
+        }, 2, '', '商户已接单')
+
+        // 不是自提并且不是商家配送
+        if (!data_take_goods_mode && !is_merchant_dispatch) {
+            console.log('不是自提并且不是商家配送,需要通知骑手')
+            //  通知骑手预备接单
+            notice_prepare_receving_order(shop_db_title + '(委托方)', `${address.numberPlate}宿舍`)
+        }
+
+
         sendRes(res, null, '接单成功。')
     } else {
         // 没付款
@@ -138,22 +169,22 @@ const receving_order = async (req, res) => {
 const dispatch_order = async (req, res) => {
     // 校验参数
     const {openid, body: params} = req
-    if (!openid) return sendErr(res, '无法校验身份请重新登录')
+
     const {out_trade_no} = params
+
     if (!out_trade_no) return sendErr(res, '订单号不能为空')
     //  查询订单
     const result_order = await order.queryOrder(out_trade_no)
     const {code, data: dt_order} = result_order
     if (!code) return sendErr(res, '订单查询遇到错误')
+
     let {openid: openid_, status, data: data_, order_over, receving_order_info, type_name: typeName} = dt_order
+
     // 解构取货模式
     const {take_goods_mode, take_goods_code, shop_id: order_shop_id} = data_
-    // 需要订单状态是已付款并且为已接单
-    if (!(status === 1 && order_over === 1)) {
-        console.log(dt_order)
-        return sendErr(res, '订单状态异常,无法派送订单。')
-    }
 
+    // 需要订单状态是已付款并且为已接单
+    if (!(status === 1 && order_over === 1)) return sendErr(res, '订单状态异常,无法派送订单。')
 
     // 获取商户信息
     const sql_query_boss = `select * from users_boss where openid = ?`
@@ -168,7 +199,6 @@ const dispatch_order = async (req, res) => {
     const sql_query_shop = `select * from shop where id = ?`
     const result_shop_db = await db_query(sql_query_shop, [shop_id])
     if (!result_shop_db.code) return sendErr(res, '查询店铺遇到报错。')
-    if (!result_shop_db.data.length) return sendErr(res, '服务器查询不到商家店铺信息。')
     const {
         id: shop_db_id,
         title: shop_db_title,
@@ -181,7 +211,6 @@ const dispatch_order = async (req, res) => {
 
     // 是否商家自配送
     const {is_merchant_dispatch} = receving_order_info
-
 
     // 自提 直接上档   配送模式，需要区分是否是等待、外派  (如果是自提模式 直接成为完单，外送模式-如果是外派 那就变成等待派送，否则派送中)
     order_over = take_goods_mode ? 4 : is_merchant_dispatch ? 3 : 2
@@ -233,10 +262,19 @@ const dispatch_order = async (req, res) => {
                 thing10: {value: db_shop_address},
                 //     送达时间
                 // {{time2.DATA}}
-                time2: {value: formatTime(1)},
+                time2: {value: formatTime()},
                 //     备注
                 // {{thing3.DATA}}
                 thing3: {value: `请前往门面自提，自提码[${take_goods_code}]`},
+            }
+            const current_time = formatTime()
+            //  配送到达
+            receving_order_info.delivery_info = {
+                openid,
+                // 接单时间
+                receving_time: current_time,
+                // 派送到达时间
+                dispatch_time: current_time
             }
             break
     }
@@ -251,6 +289,8 @@ const dispatch_order = async (req, res) => {
 
     //   返回结果
     if (!result_update.code) return sendErr(res, '订单更新失败，具体error原因如下：' + result_update.msg)
+    // 自动结束订单
+    order_over === 4 && auto_end_order(out_trade_no)
     // 发送订阅消息 进行微信通知用户
 
     if (emit_) emit_subscribe_msg(openid_, temp_id, values, 2, '17xf.cq.cn', '通知用户 正处于配送/自提')
@@ -290,8 +330,12 @@ const over_order = async (req, res) => {
 
     // 派送到达，订单完毕。
     order_over = 4
+
     const result_update = await order.updateOrder(out_trade_no, {order_over, receving_order_info})
     if (!result_update.code) return sendErr(res, '订单更新失败，具体error原因如下：' + result_update.msg)
+    // 自动结束订单
+    order_over === 4 && auto_end_order(out_trade_no)
+
     // 发送订阅消息
     const temp_id = message_tempIds.miniprogram.delivery_over
     const values = {
@@ -306,10 +350,10 @@ const over_order = async (req, res) => {
         thing10: {value: data_.address.numberPlate},
         //     送达时间
         // {{time2.DATA}}
-        time2: {value: formatTime(1)},
+        time2: {value: formatTime()},
         //     备注
         // {{thing3.DATA}}
-        thing3: {value: '订单已送达,请及时确认！(5小时后无操作自动默认送达)'},
+        thing3: {value: `请及时确认(超时后会自动确认)`},
     }
     emit_subscribe_msg(user_openid, temp_id, values, 2, '17xf.cq.cn', '通知用户已送达')
 
@@ -322,6 +366,7 @@ const pull_order = async (req, res) => {
     const {openid, body: params} = req
     // 订单号 和是否只获取今日
     const {out_trade_no, is_to_day} = params
+
     if (out_trade_no) {
         //  有订单号就拉取唯一订单
         const result = await order.queryOrder(out_trade_no)
@@ -424,7 +469,7 @@ const add_goods = async (req, res) => {
         }
 
         if (!(name && name.length > 1 && name.length < 10)) return sendErr(res, '解析表单错误，error:商品名')
-        if (!(price && price > 0.1 && name.length < 99999)) return sendErr(res, '解析表单错误，error:商品价格')
+        if (!(price && price >= 0.1 && name.length <= 99999)) return sendErr(res, '解析表单错误，error:商品价格')
         // 不是无限制库存
         console.log(!not_inventory, (inventory > 1 && inventory < 99999), inventory)
 

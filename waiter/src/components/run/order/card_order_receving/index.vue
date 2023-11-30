@@ -66,7 +66,7 @@ const jum_detail = (out_trade_no: string) => {
 
         .text {
             font-weight: bold;
-            color: rgb(230,162,60);
+            color: rgb(230, 162, 60);
         }
     }
 

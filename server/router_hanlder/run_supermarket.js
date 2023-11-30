@@ -38,10 +38,11 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var public_1 = require("../function/public");
 // 引入订单系统
+var cfg = require('../configs.js');
 var order = require('../function/order.js');
 // 骑手接单
 var receving = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var openid, params, out_trade_no, order_result, _a, type, status, order_over, data, receving_order_info, update_result;
+    var openid, params, out_trade_no, order_result, _a, type, status, order_over, data, receving_order_info, update_result, rider_ur;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
@@ -82,7 +83,14 @@ var receving = function (req, res) { return __awaiter(void 0, void 0, void 0, fu
             case 2:
                 update_result = _b.sent();
                 if (!update_result.code)
-                    return [2 /*return*/, (0, public_1.sendErr)(res, '接单失败')];
+                    return [2 /*return*/, (0, public_1.sendErr)(res, '接单失败')
+                        // 给自身增加配送费
+                    ];
+                return [4 /*yield*/, (0, public_1.db_update)("update users_run set reviewAmount = reviewAmount + ? where openid = ?", [cfg.service_fee.shop_delivery * 100, openid])];
+            case 3:
+                rider_ur = _b.sent();
+                if (!rider_ur.code)
+                    console.log('@error 骑手接单错误，本订单已接单，但未增加审核金额');
                 (0, public_1.sendRes)(res, null, '接单成功');
                 return [2 /*return*/];
         }
@@ -202,6 +210,7 @@ var change_delivery_state = function (req, res) { return __awaiter(void 0, void 
                         // 当前处于正在配送阶段，确认完成配送。
                         //  配送过程中，配送完毕。
                         order_over = 4;
+                        (0, public_1.auto_end_order)(out_trade_no);
                         state_msg = '订单已配送完成';
                         // 刻录骑手派送时间
                         receving_order_info.delivery_info.dispatch_time = (0, public_1.formatTime)(new Date());

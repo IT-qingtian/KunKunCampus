@@ -1,5 +1,19 @@
-const {sendErr, sendRes, message_tempIds, emit_subscribe_msg, formatTime} = require('../function/public')
+const {
+    sendErr,
+    sendRes,
+    message_tempIds,
+    emit_subscribe_msg,
+    formatTime,
+    db_update,
+    end_order_kd_substitute, db_query
+} = require('../function/public')
 const {db} = require('../configs')
+const order = require("../function/order");
+const {
+    service_fee,
+    LIMITED_TIME
+} = require('../configs')
+const cfg = require("../configs");
 
 // 检查是否是自己 需要传入订单信息，和openid   他会根据订单信息里面的 receving_order_info 并且解析出来的openid来判定是否是自己的openid是否相同
 const checkSelf = (order_result, openid) => {
@@ -45,44 +59,67 @@ const showKdOrderOne = async (req, res) => {
 // 确认抢单
 const grabbing = async (req, res) => {
     //     校验openid
-    const {openid, body: {id}} = req
-    if (!openid) return sendErr(res, 'openid不存在')
+    const {openid, body: {out_trade_no}} = req
+
     // 判定参数
-    if (!id) return sendErr(res, 'id参数错误')
+    if (!out_trade_no) return sendErr(res, '订单号参数错误')
+
+    // 订单查询
+    const order_r = await order.queryOrder(out_trade_no)
+    if (!order_r.code) return sendErr(res, '订单查询失败。')
+    // 解析订单
+    const {openid: client_openid} = order_r.data
+
+    // 获取自身
+    const run_r = await db_query('select * from users_run where openid = ?', [openid])
+    if (!run_r.code) return sendErr(res, '无法查询到您的信息。')
+
+    const currentTime = formatTime()
 
     // 刻录接单人信息
     const data = {
-        //     时间
-        time: new Date().getTime(),
+        auto_end_order_limited_time: cfg.LIMITED_TIME.auto_end_order,
+        //     接单时间
+        receving_time: currentTime,
+        // 取件时间
+        take_time: currentTime,
         //     接单人id
         openid
     }
-
-    // {
-    //     // // 转成mysqlData
-    //     // let mysqlData = 'receving_order_info,'
-    //     // for (const key in data) {
-    //     //     const ea = `'$.${key}','${data[key]}',`
-    //     //     mysqlData += ea
-    //     // }
-    //     // 割掉最后的逗号
-    //     // mysqlData = mysqlData.slice(0, -1)}
-    // }
-
     // 变更订单为接单
     // 定义sql语句  接单，并且
-    const sql = `update orders set order_over = 1,receving_order_info = ? where id = ? and order_over = 0`
-    // const sql = `update orders set order_over = 1,receving_order_info = JSON_SET(${mysqlData}) where id = ${id} and order_over = 0`
+    const sql = `update orders set order_over = 1,receving_order_info = ? where out_trade_no = ? and order_over = 0`
 
-    db.query(sql, [JSON.stringify(data), id], (err, result) => {
+    db.query(sql, [JSON.stringify(data), out_trade_no], (err, result) => {
         //     错误判定
         if (err) return sendErr(res, err.sqlMessage)
         //     判定结果
         if (result.affectedRows === 0) return sendErr(res, '订单不存在，可能已经被人家抢走啦。')
+
+        // 告知用户已接单
+        emit_subscribe_msg(client_openid, message_tempIds.miniprogram.receving_order, {
+            // 接单时间
+            // {{time2.DATA}}
+            time2: {
+                value: currentTime
+            },
+            // 服务类型
+            // {{thing1.DATA}}
+            thing1: {value: '快递代取'},
+            // 接单员
+            // {{thing6.DATA}}
+            thing6: {value: run_r.data[0].name},
+            // 接单员电话
+            // {{phone_number5.DATA}}
+            phone_number5: {value: run_r.data[0].phone_number},
+            // 备注
+            // {{thing4.DATA}}
+            thing4: {value: '已有代取员接单，正在为您取件配送中……'},
+        }, 2, 'http://www.baidu.com', '通知用户已有快递代取员接单。')
+
         //     返回信息
         sendRes(res, {}, '接单成功 请按照规则处理订单。')
     })
-// 告知用户 骑手已接单
 }
 
 // 取消订单
@@ -128,6 +165,100 @@ const cancel = async (req, res) => {
     })
 
 
+}
+
+
+// 更新订单状态
+const update_state = async (req, res) => {
+    const {openid, body: {out_trade_no}} = req
+    if (!out_trade_no) return sendErr(res, '订单号参数错误')
+
+    //  订单数据
+    const order_result = await order.queryOrder(out_trade_no)
+    if (!order_result.code) return sendErr(res, '订单不存在')
+
+    let {openid: user_openid, receving_order_info, order_over, data} = order_result.data
+    // 判定是否是自己的订单
+    if (receving_order_info.openid !== openid) return sendErr(res, '不支持操作他人的订单。')
+
+    // 自身信息
+    const run_r = await db_query('select * from users_run where openid = ?', [openid])
+    if (!run_r.code) return sendErr(res, '无法查询到您的信息。')
+
+
+    // 是否在操作范围内
+    if (!(order_over >= 1 && order_over <= 2)) return sendErr(res, '超出权限范围。')
+
+    const currentTime = formatTime()
+    const obj = {
+        key: '',
+        // 操作时间
+        value: currentTime
+    }
+    switch (order_over) {
+        case 1:
+            // 运送
+            obj.key = 'transport_time'
+            // 取件中
+            break
+        case 2:
+            // 送达
+            obj.key = 'delivery_time'
+            // 正在配送
+            break
+    }
+
+    order_over++
+
+    //     更新订单状态
+    const sql = `update orders set order_over = ?, receving_order_info = JSON_SET(receving_order_info, '$.${obj.key}','${obj.value}') where out_trade_no = ?`
+    db.query(sql, [order_over, out_trade_no], async (err, result) => {
+        //     错误判定
+        if (err) return sendErr(res, err.sqlMessage)
+        //     判定结果
+        if (!result.affectedRows) return sendErr(res, '更新订单状态失败，未知状况！')
+
+        switch (order_over) {
+            case 2://
+                // 正在配送
+                break
+            case 3://
+                // 已送到到
+
+                const sql = 'update users_run set reviewAmount = reviewAmount+? where openid=?'
+                // 更新骑手审核金额
+                const ur_ = await db_update(sql, [service_fee.kd_substitute * 100, openid])
+                if (!ur_.code) {
+                    console.log('更新金额失败', ur_.msg)
+                    return sendErr(res, '更新订单状态失败，未知状况！')
+                }
+                //  自动结束订单
+                setTimeout(() => {
+                    end_order_kd_substitute(out_trade_no)
+                }, LIMITED_TIME.kd_order_over)
+
+                //  告知用户 订单已完成
+                emit_subscribe_msg(user_openid, message_tempIds.miniprogram.kd_substitute_over, {
+                    //         订单名称
+                    // {{thing8.DATA}}
+                    thing8: {value: "代取快递"},
+                    //     订单类型
+                    // {{thing4.DATA}}
+                    thing4: {value: "代取业务"},
+                    //     派送地址
+                    thing10: {value: data.user.numberPlate},
+                    //     送达时间
+                    time2: {value: currentTime},
+                    //     备注
+                    thing3: {value: `${data.code.shelf_number}-${data.code.layer_number}-${data.code.number}`}
+                }, 2, '', '用于通知用户 快递已送达')
+                break
+            default:
+                return sendErr(res, '状态无效！')
+        }
+
+        sendRes(res, null, '更新成功。')
+    })
 }
 
 // 完成订单
@@ -242,5 +373,6 @@ module.exports = {
     cancel,
     showKdOrder,
     showKdOrderOne,
-    overOrder
+    overOrder,
+    update_state
 }

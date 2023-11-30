@@ -4,7 +4,7 @@
 
 <template>
     <div class="container_page_function">
-        过段时间再来看吧，这里我还不知道放些什么功能。
+        功能开发者，敬请期待……
     </div>
 </template>
 

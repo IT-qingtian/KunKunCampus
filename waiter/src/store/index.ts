@@ -9,7 +9,10 @@ export const user = defineStore('user', {
             authorization_run: uni.getStorageSync('authorization_run') || null,
 
             //  用户信息
-            userInfo: {}
+            userInfo: {},
+
+            //     费用
+            service_fee: {}
         }
     },
     actions: {
@@ -25,5 +28,9 @@ export const user = defineStore('user', {
         setUserInfo(userInfo: object) {
             this.userInfo = userInfo
         },
+
+        setServiceFee(service_fee: object) {
+            this.service_fee = service_fee
+        }
     }
 })

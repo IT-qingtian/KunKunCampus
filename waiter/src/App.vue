@@ -1,10 +1,6 @@
 <script setup lang="ts">
 import {onLaunch, onShow, onHide} from "@dcloudio/uni-app";
 import {onMounted} from "vue";
-// 引入store
-import {user} from './store'
-
-const store_user = user()
 
 onLaunch(() => {
     console.log("App Launch");
@@ -15,7 +11,7 @@ onShow(() => {
 onHide(() => {
     console.log("App Hide");
 });
-onMounted(() => {
+onMounted(async () => {
 // 验证是否存在  authorization token
 //   if (!store_user.authorization) {
 //     console.log('未登录')

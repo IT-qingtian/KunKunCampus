@@ -8,15 +8,59 @@ const axios = require("axios");
 // 引入jwt
 const jwt = require('jsonwebtoken')
 
+// const login = async (req, res) => {
+//     //  获取参数
+//     const params = req.body
+//     // 验证参数
+//     const {code} = params
+//     if (!code) return sendErr(res, 'code参数错误')
+//     console.log('code是：', code)
+//     // 通过code获取 appid
+//
+//     const {data: result} = await axios.get('https://api.weixin.qq.com/sns/oauth2/access_token', {
+//         params: {
+//             appid: cfg.appid_official,
+//             secret: cfg.secret_official,
+//             code,
+//             grant_type: 'authorization_code'
+//         }
+//     })
+//     console.log(result)
+//     // 根据result的errcode判断是否成功
+//     const {errcode, errmsg} = result
+//     if (errcode) return sendErr(res, errmsg)
+//
+//     // 拿openid
+//     const {openid} = result
+//
+//     //  数据库校验
+//     const result_logon = await logon(openid)
+//     if (!result_logon.code) return sendErr(res, '登陆校验失败。')
+//
+//     // 通过用户shop_id来获取店铺信息。
+//     const result_shop = await db_query(`select sales_volume_day,amount_day from shop where id = ${result_logon.data.shop_id}`)
+//     if (!result_shop.code) return sendErr(res, '登陆失败，查询不到店铺信息。')
+//
+//     // 整合在一起
+//     Object.assign(result_logon.data, result_shop.data[0])
+//
+//     // 生成token
+//     const token = jwt.sign({openid_official: openid}, cfg.secret_token, {expiresIn: '99999h'})
+//     console.log('获取到 商户端登陆 token:', token)
+//     // 获取
+//     sendRes(res, {
+//         token,
+//         userInfo: result_logon.data
+//     }, '登陆成功')
+// }
 const login = async (req, res) => {
     //  获取参数
     const params = req.body
     // 验证参数
     const {code} = params
-    if (!code) return sendErr(res, 'code参数错误')
-    console.log('code是：', code)
+    if (!code) return sendErr(res, '无code参数')
+    console.log('商户登录 - code是：', code)
     // 通过code获取 appid
-
     const {data: result} = await axios.get('https://api.weixin.qq.com/sns/oauth2/access_token', {
         params: {
             appid: cfg.appid_official,
@@ -32,17 +76,23 @@ const login = async (req, res) => {
 
     // 拿openid
     const {openid} = result
+    // 获取users信息
+    const sql = `select * from users_boss where openid=?`
+    const user_r = await db_query(sql, [openid])
+    if (!user_r.code) return sendErr(res, '未登记商户信息。')
+    const {shop_id} = user_r.data[0]
+
 
     //  数据库校验
-    const result_logon = await logon(openid)
-    if (!result_logon.code) return sendErr(res, '登陆校验失败。')
+    // const result_logon = await logon(openid)
+    // if (!result_logon.code) return sendErr(res, '登陆校验失败。')
 
     // 通过用户shop_id来获取店铺信息。
-    const result_shop = await db_query(`select sales_volume_day,amount_day from shop where id = ${result_logon.data.shop_id}`)
-    if (!result_shop.code) return sendErr(res, '登陆失败，查询不到店铺信息。')
+    const result_shop = await db_query(`select sales_volume_day,amount_day from shop where id = ${shop_id}`)
+    if (!result_shop.code) return sendErr(res, '错误，您的店铺查询不到。')
 
     // 整合在一起
-    Object.assign(result_logon.data, result_shop.data[0])
+    Object.assign(user_r.data[0], result_shop.data[0])
 
     // 生成token
     const token = jwt.sign({openid_official: openid}, cfg.secret_token, {expiresIn: '99999h'})
@@ -50,7 +100,7 @@ const login = async (req, res) => {
     // 获取
     sendRes(res, {
         token,
-        userInfo: result_logon.data
+        userInfo: user_r.data[0]
     }, '登陆成功')
 }
 

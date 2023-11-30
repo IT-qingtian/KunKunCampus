@@ -7,6 +7,12 @@
                 "navigationBarTitleText": "首页"
             }
         },
+        {
+            "path": "pages/index/getInvitationCode",
+            "style": {
+                "navigationBarTitleText": "邀请码申请页"
+            }
+        },
         //    店铺端
         {
             "path": "pages/boss/shop_manage",
@@ -72,6 +78,12 @@
         },
         {
             "path": "pages/run/order_detail",
+            "style": {
+                "navigationBarTitleText": "订单详情页"
+            }
+        },
+        {
+            "path": "pages/run/order_detail_kd_substitute",
             "style": {
                 "navigationBarTitleText": "订单详情页"
             }

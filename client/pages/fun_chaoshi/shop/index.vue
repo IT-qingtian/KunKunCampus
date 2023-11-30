@@ -137,7 +137,7 @@
               </div>
               <div class="settle">
                 <div class="money">
-                  <text>￥{{ place_order_price }}元</text>
+                  <text>￥{{ place_order_price }}元{{ place_order_price ? '起' : ''}}</text>
                 </div>
                 <div class="over">
                   <p v-if="!place_order_price">{{ shopData.mdp }}元起送</p>
@@ -262,6 +262,11 @@ export default {
   data() {
     return {
 
+      // 商品类别最开始的头位置
+      shop_class_title_start_top: null,
+      // class_title查询器
+      shop_class_title_query: null,
+
       place_order_ing: false,
 
       // 图片展示
@@ -305,30 +310,15 @@ export default {
     if (id === undefined) return uni.navigateBack()
     //     根据id去获取商店信息
     this.getShopInfo(id)
-
   },
   computed: {
     ...mapState('store_user', ['token']),
-    place_order_price() {
-      // 累计每个类
-      const n = this.shopData.goods.reduce((price, class_) => {
-        // 遍历每个分类里的物资
-        class_.goods.map(item => {
-          price += item.price * item.number
-        })
-        return Number(price.toFixed(2))
-      }, 0)
-      // 保留两位小数
-      // return Math.floor(n * 100) / 100
-      return n
-    }
-  },
-  methods: {
-    ...mapMutations('store_user', ['update_temp_data']),
     // 获取营业周期
-    get_trade_cycle() {
+    get_trade_cycle(e) {
       let text = ''
       const {trade_time} = this.shopData
+      if (!trade_time) return
+
       trade_time[1] && (text += '周一、')
       trade_time[2] && (text += '周二、')
       trade_time[3] && (text += '周三、')
@@ -338,6 +328,20 @@ export default {
       trade_time[0] && (text += '周日')
       return text
     },
+    place_order_price() {
+      // 累计每个类
+      const n = this.shopData.goods.reduce((price, class_) => {
+        // 遍历每个分类里的物资
+        class_.goods.map(item => {
+          price += item.price * item.number
+        })
+        return Number(price.toFixed(2))
+      }, 0)
+      return n
+    }
+  },
+  methods: {
+    ...mapMutations('store_user', ['update_temp_data']),
     loadCoommentErr(e) {
       e.img = null
     },
@@ -351,15 +355,12 @@ export default {
     // 初始化
     view_init() {
       // 处理scroll-view的适配度
-      const query = uni.createSelectorQuery()
-      query.select('.shop_goods').boundingClientRect(data => {
-        // console.log(data)
+      uni.createSelectorQuery().select('.shop_goods').boundingClientRect(data => {
+        // console.log(data.top, 'top')
         this.placeOrder.goods.scroll_view_height = data.height + "px"
       }).exec();
 
-      //  分断
-      const query_ = uni.createSelectorQuery()
-      query_.selectAll('.goods_li_').boundingClientRect(arr => {
+      uni.createSelectorQuery().selectAll('.goods_li_').boundingClientRect(arr => {
         // 如果没有值 那就不处理
         if (!arr.length) return console.log('错误啦')
         this.placeOrder.goods.goods_li_arr = arr
@@ -369,6 +370,19 @@ export default {
             parseInt(this.placeOrder.goods.goods_li_arr[end_li_h].height) <= parseInt(this.placeOrder.goods.scroll_view_height) ?
                 this.placeOrder.goods.scroll_view_height : this.placeOrder.goods.goods_li_arr[end_li_h].height + 50 + 'px'
       }).exec();
+
+      // 获取 title_ 位置
+      uni.createSelectorQuery().selectAll('.title_').boundingClientRect(title_arr => {
+        if (!title_arr.length) return uni.showToast({
+          title: "未找到商品列数据。",
+          duration: 2000,
+          icon: 'error'
+        })
+
+        this.shop_class_title_start_top = title_arr[0].top
+
+        this.shop_class_title_query = uni.createSelectorQuery().selectAll('.title_')
+      }).exec()
     },
     // 获取店铺信息
     async getShopInfo(id) {
@@ -397,7 +411,6 @@ export default {
         }
       })
 
-
       this.shopData = data.result
       this.shopData.comment.reverse()
       this.loading = false
@@ -410,6 +423,15 @@ export default {
       })
     },
 
+    // 报错
+    t_err(msg) {
+      uni.showToast({
+        title: msg,
+        icon: "error",
+        duration: 3000,
+      });
+    },
+
     // 打样判定
     is_business() {
       const dt = new Date();
@@ -419,14 +441,26 @@ export default {
       // 判断今天是否是工作日
       const day_ = new Date().getDay()
 
-      if (!(currentTime >= start_time && currentTime <= end_time && trade_time[day_])) {
-        uni.showToast({
-          title: "店家已打样，无法点餐了",
-          icon: "error"
-        });
-        return false
+      const toDay_trade = trade_time[day_]
+
+      // 今日是否处于营业状态
+      if (toDay_trade) {
+        // 是否还未营业
+        if (!(currentTime < start_time)) {
+          // 是否打烊
+          if (!(currentTime > end_time)) {
+            return true
+          } else {
+            this.t_err('店铺已打样~')
+            return false
+          }
+        } else {
+          this.t_err('店铺还未到营业时间~')
+          return false
+        }
       } else {
-        return true
+        this.t_err('店铺今日不营业哦')
+        return false
       }
     },
     // 下单
@@ -503,6 +537,20 @@ export default {
       this.placeOrder.goods.scroll_with_animation = true
       this.placeOrder.goods.anchor_id = "goods_anchor_id_" + index
     },
+    // 获取最接近的一个数的索引
+    findClosestIndex(target, numbers) {
+      // 1 [2, 3, 4]
+      let index = 0,
+          closesN = numbers[index]
+      // 遍历
+      for (let i = 0; i < numbers.length; i++) {
+        if (Math.abs(target - numbers[i]) < Math.abs(target - closesN)) {
+          closesN = numbers[i]
+          index = i
+        }
+      }
+      return index
+    },
     //   滚动_物资
     scroll_goods_(e) {
 
@@ -514,21 +562,14 @@ export default {
       clearTimeout(this.scroll_goods_timer)
       // 根据位置来定义shops_index
       this.scroll_goods_timer = setTimeout(() => {
-        const arr = this.placeOrder.goods.goods_li_arr
-        let sum = 0
-        // 遍历所有分类的高度，当高度大于滚动的高度时，就是当前的分类
-        for (let i = 0; i < arr.length; i++) {
-          sum += arr[i].height
-          if (parseInt(top) < parseInt(sum)) {
-            // console.log(i)
-            this.shops_index = i
-            break
-          } else if (parseInt(top) === parseInt(sum)) {
-            this.shops_index = i + 1
-            break
-          }
-        }
-      }, 100)
+
+        // 遍历类标题名的top位置 是否接近标准值  如果接近 那就证明现在选择了这个类别
+
+        this.shop_class_title_query.boundingClientRect(arr => {
+          const tops = arr.map(e => e.top)
+          this.shops_index = this.findClosestIndex(this.shop_class_title_start_top, tops)
+        }).exec()
+      }, 80)
     },
   },
 }

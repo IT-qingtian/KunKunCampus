@@ -34,7 +34,7 @@ const loading = (isOpen?: boolean) => {
 
 // 创建axios
 const ax = axios.create({
-    baseURL: 'http://10.14.0.88:38000',
+    baseURL: 'http://10.14.2.37:38000',
 })
 
 // 请求拦截器
@@ -67,6 +67,7 @@ type result = {
     data: any
 }
 
+
 // 登陆
 const boss_login = (code: string): Promise<result> => ax.post('/boss/login', {code})
 const run_login = (code: string): Promise<result> => ax.post('/run/login', {code})
@@ -75,7 +76,7 @@ const run_login = (code: string): Promise<result> => ax.post('/run/login', {code
 拉取订单
 * @param out_trade_no 订单号 不传入就拉取全部订单。
  */
-const boss_pull_order = (out_trade_no?: number, is_to_day?: boolean): Promise<result> => ax.post('/boss/pull_order', {
+const boss_pull_order = (out_trade_no?: string, is_to_day?: boolean): Promise<result> => ax.post('/boss/pull_order', {
     out_trade_no,
     is_to_day
 })
@@ -98,7 +99,6 @@ const boss_dispatch_order = (out_trade_no: number): Promise<result> => ax.post('
 * @param out_trade_no 订单号
  */
 const boss_over_order = (out_trade_no: number): Promise<result> => ax.post('/boss/supermarket/over_order', {out_trade_no})
-
 /*
 商户添加商品
  */
@@ -151,6 +151,34 @@ const run_get_orders = (out_trade_no?: string, is_my?: boolean): Promise<result>
 const run_receving_order = (out_trade_no: string): Promise<result> => ax.post('/run/supermarket/receving', {out_trade_no})
 /*更新订单状态*/
 const run_update_order_state = (out_trade_no: string): Promise<result> => ax.post('/run/supermarket/change_delivery_state', {out_trade_no})
+
+/*快递_抢单*/
+const run_kd_grabbing = (out_trade_no: string): Promise<result> => ax.post('/run/kd/grabbing', {out_trade_no})
+
+/*  快递 修改快递状态*/
+const run_update_order_state_kd = (out_trade_no: string): Promise<result> => ax.post('/run/kd/update_state', {out_trade_no})
+
+
+// 获取费用
+const get_service_fee = (): Promise<result> => ax.post('/get_service_fee')
+
+
+// 获取身份码
+const get_invitation_code = (code: string): Promise<result> => ax.post('/get_invitation_code', {code})
+
+
+const init = async () => {
+    //     获取 各种费用
+    const r_fee = await get_service_fee()
+
+    if (!r_fee.code) return console.log('获取费用失败！')
+
+    store_user.setServiceFee(r_fee.data)
+    console.log('r_fee.data', r_fee.data)
+}
+init()
+
+
 // 导出
 export {
     boss_login,
@@ -174,5 +202,10 @@ export {
     run_change_work_status,
     run_get_orders,
     run_receving_order,
-    run_update_order_state
+    run_update_order_state,
+
+    run_kd_grabbing,
+    run_update_order_state_kd,
+    get_service_fee,
+    get_invitation_code
 }

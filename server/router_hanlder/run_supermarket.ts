@@ -1,7 +1,17 @@
-import {db_query, sendErr, sendRes, message_tempIds, emit_subscribe_msg, formatTime} from '../function/public'
+import {
+    db_query,
+    db_update,
+    sendErr,
+    sendRes,
+    message_tempIds,
+    emit_subscribe_msg,
+    formatTime,
+    auto_end_order
+} from '../function/public'
 
 import {db} from '../configs'
 // 引入订单系统
+const cfg = require('../configs.js')
 const order = require('../function/order.js')
 
 // 骑手接单
@@ -39,6 +49,10 @@ const receving = async (req, res) => {
     //  刻录进数据库
     const update_result = await order.updateOrder(out_trade_no, {receving_order_info})
     if (!update_result.code) return sendErr(res, '接单失败')
+    // 给自身增加配送费
+    const rider_ur = await db_update(`update users_run set reviewAmount = reviewAmount + ? where openid = ?`, [cfg.service_fee.shop_delivery * 100, openid])
+    if (!rider_ur.code) console.log('@error 骑手接单错误，本订单已接单，但未增加审核金额')
+
     sendRes(res, null, '接单成功')
 }
 
@@ -50,6 +64,7 @@ const change_delivery_state = async (req, res) => {
 
     //  订单数据
     const order_result = await order.queryOrder(out_trade_no)
+
     if (!order_result.code) return sendErr(res, '订单不存在')
 
     // 解析 订单类型、订单付款状态，当前状态，接单信息   思路 确定类型、已付款、外派模式、是本人接单、商家处理好了
@@ -141,6 +156,7 @@ const change_delivery_state = async (req, res) => {
             // 当前处于正在配送阶段，确认完成配送。
             //  配送过程中，配送完毕。
             order_over = 4
+            auto_end_order(out_trade_no)
             state_msg = '订单已配送完成'
             // 刻录骑手派送时间
             receving_order_info.delivery_info.dispatch_time = formatTime(new Date())

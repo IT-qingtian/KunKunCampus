@@ -106,18 +106,18 @@
             </el-form-item>
 
             <!--库存-->
-            <el-form-item label="商品库存：" prop="inventory">
-                <el-row>
-                    <el-col :span="12">
-                        <el-input type="number" v-model.number="form.inventory"
-                                  :disabled="form.not_inventory"
-                                  @change="form.inventory = Number(Number(form.price).toFixed(0))"></el-input>
-                    </el-col>
-                    <el-col :span="12">
-                        <el-checkbox v-model="form.not_inventory" style="margin-left: 5px" label="无限制" size="large"/>
-                    </el-col>
-                </el-row>
-            </el-form-item>
+            <!--            <el-form-item label="商品库存：" prop="inventory">-->
+            <!--                <el-row>-->
+            <!--                    <el-col :span="12">-->
+            <!--                        <el-input type="number" v-model.number="form.inventory"-->
+            <!--                                  :disabled="form.not_inventory"-->
+            <!--                                  @change="form.inventory = Number(Number(form.price).toFixed(0))"></el-input>-->
+            <!--                    </el-col>-->
+            <!--                    <el-col :span="12">-->
+            <!--                        <el-checkbox v-model="form.not_inventory" style="margin-left: 5px" label="无限制" size="large"/>-->
+            <!--                    </el-col>-->
+            <!--                </el-row>-->
+            <!--            </el-form-item>-->
             <!--提交-->
             <el-form-item>
                 <el-button size="large" type="primary" @click="onSubmit(ref_form)">
@@ -210,7 +210,7 @@ const form_rules = reactive<FormRules>({
             if (value === '') {
                 next(('请填写价格。'))
             } else {
-                value > 0.1 && value < 99999 ? next() : next('价格必须是0.1元~99999元范围内。')
+                value >= 0.1 && value <= 99999 ? next() : next('价格必须是0.1元~99999元范围内。')
             }
         }, trigger: 'change'
     }],

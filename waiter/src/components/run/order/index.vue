@@ -3,6 +3,7 @@
 import {run_get_orders} from '@/server'
 import {onMounted, reactive, ref} from "vue";
 import card_order_receving from '@/components/run/order/card_order_receving/index.vue'
+import card_order_receving_kd_substitute from '@/components/run/order/card_order_receving_kd_substitute/index.vue'
 
 let receving_ = ref(true)
 
@@ -147,7 +148,13 @@ onMounted(async () => {
             </div>
             <scroll-view scroll-y height class="order_scroll">
                 <div class="item_order" v-for="item in data.orders">
+                    <card_order_receving_kd_substitute
+                        v-if="item.type ===1"
+                        :data=item
+                    ></card_order_receving_kd_substitute>
+
                     <card_order_receving
+                        v-if="item.type === 3"
                         v-show="control.receving.view_list[control.receving.index].show_require(item)"
                         :data=item
                         :text="`${((new Date().getTime() - new Date(item.receving_order_info?.shop_info?.receving_time).getTime()) / 1000 / 60 || 0).toFixed(0)}分钟前`"></card_order_receving>
@@ -162,7 +169,9 @@ onMounted(async () => {
                         v-for="(item,index) in control.my.view_list"
                         @click="control.my.hanlder(index)"
                         :class="{active:control.my.index === index}">
-                        {{ item.text + (data.orders.filter(item_ => control.my.view_list[index].show_require(item_)).length ? `(${data.orders.filter(item_ => control.my.view_list[index].show_require(item_)).length})` : '') }}
+                        {{
+                            item.text + (data.orders.filter(item_ => control.my.view_list[index].show_require(item_)).length ? `(${data.orders.filter(item_ => control.my.view_list[index].show_require(item_)).length})` : '')
+                        }}
                     </div>
                 </div>
             </scroll-view>
@@ -170,6 +179,11 @@ onMounted(async () => {
                 <div class="item_order" v-for="(item,index) in data.orders"
                      :key="index"
                      v-show="control.my.view_list[control.my.index].show_require(item)">
+                    <card_order_receving_kd_substitute
+                        v-if="item.type ===1"
+                        :data=item
+                    ></card_order_receving_kd_substitute>
+
                     <card_order_receving
                         v-if="item.type === 3"
                         :data=item

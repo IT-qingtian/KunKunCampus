@@ -54,7 +54,8 @@ var path = require('path');
 var fs = require("fs");
 // 引入multiparty
 var multiparty = require('multiparty');
-var _a = require('../function/public.js'), sendRes = _a.sendRes, sendErr = _a.sendErr, message_tempIds = _a.message_tempIds, emit_subscribe_msg = _a.emit_subscribe_msg, formatTime = _a.formatTime, db_query = _a.db_query, db_update = _a.db_update, generateRandomNumber = _a.generateRandomNumber, TEMPORORAY_ADDRESS = _a.TEMPORORAY_ADDRESS;
+var cfg = require('../configs');
+var _a = require('../function/public.js'), sendRes = _a.sendRes, sendErr = _a.sendErr, message_tempIds = _a.message_tempIds, emit_subscribe_msg = _a.emit_subscribe_msg, notice_prepare_receving_order = _a.notice_prepare_receving_order, formatTime = _a.formatTime, db_query = _a.db_query, db_update = _a.db_update, generateRandomNumber = _a.generateRandomNumber, TEMPORORAY_ADDRESS = _a.TEMPORORAY_ADDRESS, auto_end_order = _a.auto_end_order;
 var order = require('../function/order.js');
 // ==================================START========================================
 //               0未接单，
@@ -65,16 +66,12 @@ var order = require('../function/order.js');
 // ==================================END========================================
 // 商家接单  参数：out_trade_no（订单号）  is_merchant_dispatch（是否商家自送）
 var receving_order = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var openid, _a, out_trade_no, is_merchant_dispatch, order_result, code, data, status, order_over, order_db_openid, order_data, total, data_shop_id, data_goods, data_take_goods_mode, sql_query_boss, result_boss_info, boss_info, shop_id, reviewAmount, sql_query_shop, shop_db, _b, shop_db_id, shop_db_title, shop_phone_number, receving_order_info, update_result, sql_add_reviewAmount, result_update_boss, code_1, err, update_result_1;
+    var openid, _a, out_trade_no, is_merchant_dispatch //是否商户配送
+    , order_result, code, data, status, order_over, order_db_openid, order_data, data_shop_id, data_goods, data_take_goods_mode, address, sql_query_boss, result_boss_info, boss_info, shop_id, reviewAmount, sql_query_shop, shop_db, _b, shop_db_id, shop_db_title, shop_phone_number, receving_order_info, update_result, sql_add_reviewAmount, goods_total, result_update_boss, code_1, err, update_result_1;
     return __generator(this, function (_c) {
         switch (_c.label) {
             case 0:
                 openid = req.openid;
-                // 校验参数
-                if (!openid)
-                    return [2 /*return*/, sendErr(res, '无法校验身份请重新登录')
-                        // 获取参数
-                    ];
                 _a = req.body, out_trade_no = _a.out_trade_no, is_merchant_dispatch = _a.is_merchant_dispatch;
                 return [4 /*yield*/, order.queryOrder(out_trade_no)
                     // 校验订单
@@ -86,16 +83,14 @@ var receving_order = function (req, res) { return __awaiter(void 0, void 0, void
                     return [2 /*return*/, sendErr(res, '订单不存在')
                         // 解析data-这里是订单数据
                     ];
-                status = data.status, order_over = data.order_over, order_db_openid = data.openid, order_data = data.data, total = data.total;
-                data_shop_id = order_data.shop_id, data_goods = order_data.goods, data_take_goods_mode = order_data.take_goods_mode;
+                status = data.status, order_over = data.order_over, order_db_openid = data.openid, order_data = data.data;
+                data_shop_id = order_data.shop_id, data_goods = order_data.goods, data_take_goods_mode = order_data.take_goods_mode, address = order_data.address;
                 sql_query_boss = "select * from users_boss where openid = ?";
                 return [4 /*yield*/, db_query(sql_query_boss, [openid])];
             case 2:
                 result_boss_info = _c.sent();
                 if (!result_boss_info.code)
-                    return [2 /*return*/, sendErr(res, '接单失败，查询商家信息遇到报错。')];
-                if (!result_boss_info.data.length)
-                    return [2 /*return*/, sendErr(res, '接单失败，服务器查询不到商家信息。')
+                    return [2 /*return*/, sendErr(res, '接单失败，查询商家信息遇到报错。')
                         // 最终商家信息
                     ];
                 boss_info = result_boss_info.data[0];
@@ -116,13 +111,19 @@ var receving_order = function (req, res) { return __awaiter(void 0, void 0, void
                     ];
                 if (!(status == 1 && order_over == 0)) return [3 /*break*/, 8];
                 receving_order_info = "'".concat(JSON.stringify({
+                    // 商户信息
                     shop_info: {
                         openid: openid,
                         shop_id: shop_id,
                         // 商户接单时间
                         receving_time: formatTime()
                     },
-                    is_merchant_dispatch: is_merchant_dispatch
+                    // 是否自主配送
+                    is_merchant_dispatch: is_merchant_dispatch,
+                    //  自动完成完成订单
+                    auto_end_order_limited_time: cfg.LIMITED_TIME.auto_end_order,
+                    //  是否晚自动
+                    is_later_auto: false
                 }), "'");
                 return [4 /*yield*/, order.updateOrder(out_trade_no, { order_over: 1, receving_order_info: receving_order_info })
                     // 判定状态
@@ -135,7 +136,10 @@ var receving_order = function (req, res) { return __awaiter(void 0, void 0, void
                         // 增加老板的审核金额
                     ];
                 sql_add_reviewAmount = "update users_boss set reviewAmount = ? where shop_id = ?";
-                return [4 /*yield*/, db_update(sql_add_reviewAmount, [reviewAmount + total, shop_id])];
+                goods_total = order_data.goods.reduce(function (total, item) {
+                    return total += item.price * 100 * item.number;
+                }, 0);
+                return [4 /*yield*/, db_update(sql_add_reviewAmount, [reviewAmount + goods_total, shop_id])];
             case 5:
                 result_update_boss = _c.sent();
                 code_1 = result_update_boss.code, err = result_update_boss.err;
@@ -156,7 +160,7 @@ var receving_order = function (req, res) { return __awaiter(void 0, void 0, void
                     // 接单时间
                     // {{time2.DATA}}
                     time2: {
-                        value: formatTime(1)
+                        value: formatTime()
                     },
                     // 服务类型
                     // {{thing1.DATA}}
@@ -170,7 +174,13 @@ var receving_order = function (req, res) { return __awaiter(void 0, void 0, void
                     // 备注
                     // {{thing4.DATA}}
                     thing4: { value: '店铺已接单，正在处理中。' },
-                }, 2, '17xf.cq.cn', '商户已接单');
+                }, 2, '', '商户已接单');
+                // 不是自提并且不是商家配送
+                if (!data_take_goods_mode && !is_merchant_dispatch) {
+                    console.log('不是自提并且不是商家配送,需要通知骑手');
+                    //  通知骑手预备接单
+                    notice_prepare_receving_order(shop_db_title + '(委托方)', "".concat(address.numberPlate, "\u5BBF\u820D"));
+                }
                 sendRes(res, null, '接单成功。');
                 return [3 /*break*/, 9];
             case 8:
@@ -191,13 +201,11 @@ var receving_order = function (req, res) { return __awaiter(void 0, void 0, void
 }); };
 // 商家派送（完成）订单 参数：out_trade_no（订单号）   如果是自提模式 那就会直接成为已完成处理完毕。
 var dispatch_order = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var openid, params, out_trade_no, result_order, code, dt_order, openid_, status, data_, order_over, receving_order_info, typeName, take_goods_mode, take_goods_code, order_shop_id, sql_query_boss, result_boss_info, shop_id, sql_query_shop, result_shop_db, _a, shop_db_id, shop_db_title, shop_phone_number, db_shop_address, is_merchant_dispatch, msg_, temp_id, values, emit_, result_update;
+    var openid, params, out_trade_no, result_order, code, dt_order, openid_, status, data_, order_over, receving_order_info, typeName, take_goods_mode, take_goods_code, order_shop_id, sql_query_boss, result_boss_info, shop_id, sql_query_shop, result_shop_db, _a, shop_db_id, shop_db_title, shop_phone_number, db_shop_address, is_merchant_dispatch, msg_, temp_id, values, emit_, current_time, result_update;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
                 openid = req.openid, params = req.body;
-                if (!openid)
-                    return [2 /*return*/, sendErr(res, '无法校验身份请重新登录')];
                 out_trade_no = params.out_trade_no;
                 if (!out_trade_no)
                     return [2 /*return*/, sendErr(res, '订单号不能为空')
@@ -212,10 +220,10 @@ var dispatch_order = function (req, res) { return __awaiter(void 0, void 0, void
                 openid_ = dt_order.openid, status = dt_order.status, data_ = dt_order.data, order_over = dt_order.order_over, receving_order_info = dt_order.receving_order_info, typeName = dt_order.type_name;
                 take_goods_mode = data_.take_goods_mode, take_goods_code = data_.take_goods_code, order_shop_id = data_.shop_id;
                 // 需要订单状态是已付款并且为已接单
-                if (!(status === 1 && order_over === 1)) {
-                    console.log(dt_order);
-                    return [2 /*return*/, sendErr(res, '订单状态异常,无法派送订单。')];
-                }
+                if (!(status === 1 && order_over === 1))
+                    return [2 /*return*/, sendErr(res, '订单状态异常,无法派送订单。')
+                        // 获取商户信息
+                    ];
                 sql_query_boss = "select * from users_boss where openid = ?";
                 return [4 /*yield*/, db_query(sql_query_boss, [openid])];
             case 2:
@@ -233,8 +241,6 @@ var dispatch_order = function (req, res) { return __awaiter(void 0, void 0, void
                 result_shop_db = _b.sent();
                 if (!result_shop_db.code)
                     return [2 /*return*/, sendErr(res, '查询店铺遇到报错。')];
-                if (!result_shop_db.data.length)
-                    return [2 /*return*/, sendErr(res, '服务器查询不到商家店铺信息。')];
                 _a = result_shop_db.data[0], shop_db_id = _a.id, shop_db_title = _a.title, shop_phone_number = _a.phone_number, db_shop_address = _a.address;
                 //     比对shop_id
                 if (!(order_shop_id === shop_id && shop_id === shop_db_id))
@@ -290,10 +296,19 @@ var dispatch_order = function (req, res) { return __awaiter(void 0, void 0, void
                             thing10: { value: db_shop_address },
                             //     送达时间
                             // {{time2.DATA}}
-                            time2: { value: formatTime(1) },
+                            time2: { value: formatTime() },
                             //     备注
                             // {{thing3.DATA}}
                             thing3: { value: "\u8BF7\u524D\u5F80\u95E8\u9762\u81EA\u63D0\uFF0C\u81EA\u63D0\u7801[".concat(take_goods_code, "]") },
+                        };
+                        current_time = formatTime();
+                        //  配送到达
+                        receving_order_info.delivery_info = {
+                            openid: openid,
+                            // 接单时间
+                            receving_time: current_time,
+                            // 派送到达时间
+                            dispatch_time: current_time
                         };
                         break;
                 }
@@ -308,8 +323,10 @@ var dispatch_order = function (req, res) { return __awaiter(void 0, void 0, void
                 //   返回结果
                 if (!result_update.code)
                     return [2 /*return*/, sendErr(res, '订单更新失败，具体error原因如下：' + result_update.msg)
-                        // 发送订阅消息 进行微信通知用户
+                        // 自动结束订单
                     ];
+                // 自动结束订单
+                order_over === 4 && auto_end_order(out_trade_no);
                 // 发送订阅消息 进行微信通知用户
                 if (emit_)
                     emit_subscribe_msg(openid_, temp_id, values, 2, '17xf.cq.cn', '通知用户 正处于配送/自提');
@@ -361,8 +378,10 @@ var over_order = function (req, res) { return __awaiter(void 0, void 0, void 0, 
                 result_update = _a.sent();
                 if (!result_update.code)
                     return [2 /*return*/, sendErr(res, '订单更新失败，具体error原因如下：' + result_update.msg)
-                        // 发送订阅消息
+                        // 自动结束订单
                     ];
+                // 自动结束订单
+                order_over === 4 && auto_end_order(out_trade_no);
                 temp_id = message_tempIds.miniprogram.delivery_over;
                 values = {
                     // 订单名称
@@ -376,10 +395,10 @@ var over_order = function (req, res) { return __awaiter(void 0, void 0, void 0, 
                     thing10: { value: data_.address.numberPlate },
                     //     送达时间
                     // {{time2.DATA}}
-                    time2: { value: formatTime(1) },
+                    time2: { value: formatTime() },
                     //     备注
                     // {{thing3.DATA}}
-                    thing3: { value: '订单已送达,请及时确认！(5小时后无操作自动默认送达)' },
+                    thing3: { value: "\u8BF7\u53CA\u65F6\u786E\u8BA4(\u8D85\u65F6\u540E\u4F1A\u81EA\u52A8\u786E\u8BA4)" },
                 };
                 emit_subscribe_msg(user_openid, temp_id, values, 2, '17xf.cq.cn', '通知用户已送达');
                 sendRes(res, null, '订单送达完毕。');
@@ -494,7 +513,7 @@ var add_goods = function (req, res) { return __awaiter(void 0, void 0, void 0, f
                                 }
                                 if (!(name && name.length > 1 && name.length < 10))
                                     return [2 /*return*/, sendErr(res, '解析表单错误，error:商品名')];
-                                if (!(price && price > 0.1 && name.length < 99999))
+                                if (!(price && price >= 0.1 && name.length <= 99999))
                                     return [2 /*return*/, sendErr(res, '解析表单错误，error:商品价格')
                                         // 不是无限制库存
                                     ];

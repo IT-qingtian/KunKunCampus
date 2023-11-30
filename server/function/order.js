@@ -1,6 +1,5 @@
 //  从配置区引入数据库
 const cfg = require('../configs')
-const {db} = cfg
 // console.log(db, 3)
 // 订单系统
 const system_order = {
@@ -41,7 +40,7 @@ const system_order = {
 
             const sql = `INSERT INTO orders (openid, description, total, type, data, status, out_trade_no, order_over,time_create_order) VALUES (?, ?, ?, ?, ?, 0, ?, ?,?)`
 
-            db.query(sql, [openid, description, total, type, data, out_trade_no, order_over, time_create_order], (err, result) => {
+            cfg.db.query(sql, [openid, description, total, type, data, out_trade_no, order_over, time_create_order], (err, result) => {
                 // 错误检测
                 if (err) {
                     console.log('错误，订单写入数据库失败：', err.sqlMessage)
@@ -65,11 +64,17 @@ const system_order = {
 
         // 循环params键值对 组成sql语句修改部分
         let sql_ = ''
-        for (let key in params) {
-            sql_ += `${key} = ${params[key]},`
+        if (typeof params === 'string') {
+            sql_ = params
+        } else {
+            for (let key in params) {
+                sql_ += `${key} = ${params[key]},`
+            }
+            // 去除最后一个逗号
+            sql_ = sql_.slice(0, -1)
         }
-        // 去除最后一个逗号
-        sql_ = sql_.slice(0, -1)
+
+        // console.log(sql_)
 
         //  根据params生成sql语句 并且使用 订单号查询。
         const sql = `UPDATE orders SET ${sql_} WHERE out_trade_no = ${out_trade_no}`
@@ -77,7 +82,7 @@ const system_order = {
         // console.log('：：修改sql：', sql)
 
         return new Promise(resolve => {
-            db.query(sql, [params.status], (err, result) => {
+            cfg.db.query(sql, [params.status], (err, result) => {
                 //  错误检测
                 if (err) {
                     console.log('修改订单错误', sql, err.sqlMessage)
@@ -94,16 +99,19 @@ const system_order = {
         return new Promise((resolve, reject) => {
             if (!out_trade_no) resolve({code: 0, data: null})
             const sql = `SELECT * FROM orders WHERE out_trade_no = ?`
-            db.query(sql, [out_trade_no], (err, result) => {
+            cfg.db.query(sql, [out_trade_no], (err, result) => {
                 //  错误检测
-                if (err) return resolve({
-                    code: 0,
-                    msg: '查询订单失败' + err.sqlMessage
-                })
+                if (err) {
+                    console.log(err)
+                    return resolve({
+                        code: 0,
+                        msg: '查询订单失败' + err.sqlMessage
+                    })
+                }
                 // 判定订单数
                 if (!result.length) return resolve({
                     code: 0,
-                    msg: '无订单',
+                    msg: '订单不存在',
                 })
                 return resolve({
                     code: 1,
@@ -117,7 +125,7 @@ const system_order = {
     deleteOrder: function (out_trade_no) {
         return new Promise((resolve, reject) => {
             const sql = `DELETE FROM orders WHERE out_trade_no = ?`
-            db.query(sql, [out_trade_no], (err, result) => {
+            cfg.db.query(sql, [out_trade_no], (err, result) => {
                 //  错误检测
                 if (err) return resolve({
                     code: 0,

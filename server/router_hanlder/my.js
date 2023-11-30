@@ -152,9 +152,21 @@ const getSubscribeMesTIDS = (req, res) => {
     //  携带订阅消息tempIds
     sendRes(res, subScribeMesTIDS)
 }
+const get_base_data = (req, res) => {
+    //  携带订阅消息tempIds
+    sendRes(res, {
+        // 宿舍性别分组
+        dorm_sex_group: cfg.dorm_sex_group,
+        // 各种服务费用
+        service_fee: cfg.service_fee,
+        // 订阅消息模板
+        subScribeMesTIDS: message_tempIds.miniprogram,
+    })
+}
 
 module.exports = {
     login,
     login_dev,
-    getSubscribeMesTIDS
+    getSubscribeMesTIDS,
+    get_base_data
 };

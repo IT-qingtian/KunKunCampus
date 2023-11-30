@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import {user} from '@/store'
+
+const store_user = user()
+
 // 导入 组件名
 import {defineComponent} from "vue";
 // 获取props
@@ -11,7 +15,7 @@ const jum_detail = (out_trade_no: string) => {
     console.log('---跳转订单详情', out_trade_no)
 //     跳转到详情页
     uni.navigateTo({
-        url: '/pages/run/order_detail?out_trade_no=' + out_trade_no
+        url: '/pages/run/order_detail_kd_substitute?out_trade_no=' + out_trade_no
     })
 }
 
@@ -30,22 +34,25 @@ const jum_detail = (out_trade_no: string) => {
         <!--        分割线-->
         <el-divider class="divider"></el-divider>
         <div class="title">
-            订单类型：取货送货
+            订单类型：{{ data.description }}
         </div>
         <div class="content">
             <div class="info">
-                <div class="start_position">
-                    起始：{{ data.data.shop_title }}
+                <div class="code">
+                    取件码：{{ data.data.code.shelf_number }}-{{ data.data.code.layer_number }}-{{ data.data.code.number }}
                 </div>
                 <div class="end_position">
-                    送至：{{ data.data.address.numberPlate }} 宿舍
+                    送&nbsp;&nbsp;&nbsp;至：{{ data.data.user.numberPlate }}
                 </div>
-                <div class="notes" v-if="data.data.notes">
-                    备注：{{ data.data.notes }}
+                <div class="userInfo">
+                    用户信息：{{ data.data.user.name }} {{ data.data.user.phoneCode }}
+                </div>
+                <div class="notes" v-if="data.data.remarks">
+                    备注：{{ data.data.remarks }}
                 </div>
             </div>
             <div class="control">
-                <div class="price">￥{{ data.data.delivery_fee }}</div>
+                <div class="price">￥{{ store_user.service_fee.kd_substitute }}</div>
                 <el-button size="large" type="warning" @click="jum_detail(data.out_trade_no )">查看</el-button>
             </div>
         </div>
@@ -66,7 +73,7 @@ const jum_detail = (out_trade_no: string) => {
 
         .text {
             font-weight: bold;
-            color: rgb(230,162,60);
+            color: rgb(230, 162, 60);
         }
     }
 

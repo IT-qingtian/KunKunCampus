@@ -18,7 +18,7 @@ router.post("/confirm", confirm);
 router.post('/orderQuery', orderQuery)
 
 // 用户评论订单
-router.post('appraise', appraise)
+router.post('/appraise', appraise)
 
 
 module.exports = router;

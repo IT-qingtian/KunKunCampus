@@ -30,7 +30,7 @@ const loading = (isOpen) => {
 };
 // 创建axios
 const ax = axios.create({
-    baseURL: 'http://10.14.0.88:38000',
+    baseURL: 'http://10.14.2.37:38000',
 });
 // 请求拦截器
 ax.interceptors.request.use((req) => {
@@ -126,6 +126,23 @@ const run_get_orders = (out_trade_no, is_my) => ax.post('/run/get_orders', {
 const run_receving_order = (out_trade_no) => ax.post('/run/supermarket/receving', { out_trade_no });
 /*更新订单状态*/
 const run_update_order_state = (out_trade_no) => ax.post('/run/supermarket/change_delivery_state', { out_trade_no });
+/*快递_抢单*/
+const run_kd_grabbing = (out_trade_no) => ax.post('/run/kd/grabbing', { out_trade_no });
+/*  快递 修改快递状态*/
+const run_update_order_state_kd = (out_trade_no) => ax.post('/run/kd/update_state', { out_trade_no });
+// 获取费用
+const get_service_fee = () => ax.post('/get_service_fee');
+// 获取身份码
+const get_invitation_code = (code) => ax.post('/get_invitation_code', { code });
+const init = async () => {
+    //     获取 各种费用
+    const r_fee = await get_service_fee();
+    if (!r_fee.code)
+        return console.log('获取费用失败！');
+    store_user.setServiceFee(r_fee.data);
+    console.log('r_fee.data', r_fee.data);
+};
+init();
 // 导出
-export { boss_login, run_login, boss_pull_order, boss_receving_order, boss_dispatch_order, boss_over_order, boss_add_goods, boss_get_goods, boss_add_group, boss_change_off_state, boss_update_goods_data, boss_delete_goods, boss_delete_group, boss_get_shop_info, boss_update_shop_data, run_get_user_info, run_change_work_status, run_get_orders, run_receving_order, run_update_order_state };
+export { boss_login, run_login, boss_pull_order, boss_receving_order, boss_dispatch_order, boss_over_order, boss_add_goods, boss_get_goods, boss_add_group, boss_change_off_state, boss_update_goods_data, boss_delete_goods, boss_delete_group, boss_get_shop_info, boss_update_shop_data, run_get_user_info, run_change_work_status, run_get_orders, run_receving_order, run_update_order_state, run_kd_grabbing, run_update_order_state_kd, get_service_fee, get_invitation_code };
 //# sourceMappingURL=index.js.map

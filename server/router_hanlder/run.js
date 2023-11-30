@@ -15,7 +15,7 @@ const login = async (req, res) => {
     // 验证参数
     const {code} = params
     if (!code) return sendErr(res, 'code参数错误')
-    console.log('code是：', code)
+    console.log('骑手登录 - code是：', code)
     // 通过code获取 appid
 
     const {data: result} = await axios.get('https://api.weixin.qq.com/sns/oauth2/access_token', {
@@ -30,10 +30,14 @@ const login = async (req, res) => {
 
     // 拿openid
     const {openid} = result
+    // 获取users信息
+    const sql = `select * from users_run where openid=?`
+    const user_r = await db_query(sql, [openid])
+    if (!user_r.code) return sendErr(res, '请先联系管理员注册骑手。')
 
     //  数据库校验
-    const result_logon = await logon(openid)
-    if (!result_logon.code) return sendErr(res, '登陆校验失败。')
+    // const result_logon = await logon(openid)
+    // if (!result_logon.code) return sendErr(res, '登陆校验失败。')
 
     // 生成token
     const token = jwt.sign({openid_official: openid}, cfg.secret_token, {expiresIn: expriseIn_token})

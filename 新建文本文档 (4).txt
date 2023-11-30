@@ -1,5 +1,11 @@
 获取code：
-https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx312e2382a20cdbce&redirect_uri=http://17xf.cq.cn&response_type=code&scope=snsapi_base&state=none#wechat_redirect
+https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx312e2382a20cdbce&redirect_uri=http://yszz.17xf.cq.cn&response_type=code&scope=snsapi_base&state=none#wechat_redirect
+
+
+https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx312e2382a20cdbce&redirect_uri=http://yszz.17xf.cq.cn/#/pages/run/index&response_type=code&scope=snsapi_base&state=none#wechat_redirect
+
+
+http://17xf.cq.cn/#/pages/index/getInvitationCode
 
 登陆授权：
 http://localhost:5173/#/pages/boss/login?code=

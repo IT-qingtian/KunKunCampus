@@ -243,6 +243,10 @@ var _default = {
   name: "index",
   data: function data() {
     return {
+      // 商品类别最开始的头位置
+      shop_class_title_start_top: null,
+      // class_title查询器
+      shop_class_title_query: null,
       place_order_ing: false,
       // 图片展示
       imgShow: {
@@ -304,25 +308,11 @@ var _default = {
     }))();
   },
   computed: _objectSpread(_objectSpread({}, (0, _vuex.mapState)('store_user', ['token'])), {}, {
-    place_order_price: function place_order_price() {
-      // 累计每个类
-      var n = this.shopData.goods.reduce(function (price, class_) {
-        // 遍历每个分类里的物资
-        class_.goods.map(function (item) {
-          price += item.price * item.number;
-        });
-        return Number(price.toFixed(2));
-      }, 0);
-      // 保留两位小数
-      // return Math.floor(n * 100) / 100
-      return n;
-    }
-  }),
-  methods: _objectSpread(_objectSpread({}, (0, _vuex.mapMutations)('store_user', ['update_temp_data'])), {}, {
     // 获取营业周期
-    get_trade_cycle: function get_trade_cycle() {
+    get_trade_cycle: function get_trade_cycle(e) {
       var text = '';
       var trade_time = this.shopData.trade_time;
+      if (!trade_time) return;
       trade_time[1] && (text += '周一、');
       trade_time[2] && (text += '周二、');
       trade_time[3] && (text += '周三、');
@@ -332,6 +322,19 @@ var _default = {
       trade_time[0] && (text += '周日');
       return text;
     },
+    place_order_price: function place_order_price() {
+      // 累计每个类
+      var n = this.shopData.goods.reduce(function (price, class_) {
+        // 遍历每个分类里的物资
+        class_.goods.map(function (item) {
+          price += item.price * item.number;
+        });
+        return Number(price.toFixed(2));
+      }, 0);
+      return n;
+    }
+  }),
+  methods: _objectSpread(_objectSpread({}, (0, _vuex.mapMutations)('store_user', ['update_temp_data'])), {}, {
     loadCoommentErr: function loadCoommentErr(e) {
       e.img = null;
     },
@@ -346,21 +349,28 @@ var _default = {
     view_init: function view_init() {
       var _this2 = this;
       // 处理scroll-view的适配度
-      var query = uni.createSelectorQuery();
-      query.select('.shop_goods').boundingClientRect(function (data) {
-        // console.log(data)
+      uni.createSelectorQuery().select('.shop_goods').boundingClientRect(function (data) {
+        // console.log(data.top, 'top')
         _this2.placeOrder.goods.scroll_view_height = data.height + "px";
       }).exec();
-
-      //  分断
-      var query_ = uni.createSelectorQuery();
-      query_.selectAll('.goods_li_').boundingClientRect(function (arr) {
+      uni.createSelectorQuery().selectAll('.goods_li_').boundingClientRect(function (arr) {
         // 如果没有值 那就不处理
         if (!arr.length) return console.log('错误啦');
         _this2.placeOrder.goods.goods_li_arr = arr;
         //  处理最后一个元素高度  当最后一个盒子高度小于scroll-view的高度时，最后一个盒子为 scroll-view的高度  否则多出一截
         var end_li_h = arr.length - 1;
         _this2.placeOrder.goods.goods_li_arr_end_height = parseInt(_this2.placeOrder.goods.goods_li_arr[end_li_h].height) <= parseInt(_this2.placeOrder.goods.scroll_view_height) ? _this2.placeOrder.goods.scroll_view_height : _this2.placeOrder.goods.goods_li_arr[end_li_h].height + 50 + 'px';
+      }).exec();
+
+      // 获取 title_ 位置
+      uni.createSelectorQuery().selectAll('.title_').boundingClientRect(function (title_arr) {
+        if (!title_arr.length) return uni.showToast({
+          title: "未找到商品列数据。",
+          duration: 2000,
+          icon: 'error'
+        });
+        _this2.shop_class_title_start_top = title_arr[0].top;
+        _this2.shop_class_title_query = uni.createSelectorQuery().selectAll('.title_');
       }).exec();
     },
     // 获取店铺信息
@@ -427,6 +437,14 @@ var _default = {
         }, _callee2);
       }))();
     },
+    // 报错
+    t_err: function t_err(msg) {
+      uni.showToast({
+        title: msg,
+        icon: "error",
+        duration: 3000
+      });
+    },
     // 打样判定
     is_business: function is_business() {
       var dt = new Date();
@@ -438,14 +456,26 @@ var _default = {
 
       // 判断今天是否是工作日
       var day_ = new Date().getDay();
-      if (!(currentTime >= start_time && currentTime <= end_time && trade_time[day_])) {
-        uni.showToast({
-          title: "店家已打样，无法点餐了",
-          icon: "error"
-        });
-        return false;
+      var toDay_trade = trade_time[day_];
+
+      // 今日是否处于营业状态
+      if (toDay_trade) {
+        // 是否还未营业
+        if (!(currentTime < start_time)) {
+          // 是否打烊
+          if (!(currentTime > end_time)) {
+            return true;
+          } else {
+            this.t_err('店铺已打样~');
+            return false;
+          }
+        } else {
+          this.t_err('店铺还未到营业时间~');
+          return false;
+        }
       } else {
-        return true;
+        this.t_err('店铺今日不营业哦');
+        return false;
       }
     },
     // 下单
@@ -560,6 +590,20 @@ var _default = {
       this.placeOrder.goods.scroll_with_animation = true;
       this.placeOrder.goods.anchor_id = "goods_anchor_id_" + index;
     },
+    // 获取最接近的一个数的索引
+    findClosestIndex: function findClosestIndex(target, numbers) {
+      // 1 [2, 3, 4]
+      var index = 0,
+        closesN = numbers[index];
+      // 遍历
+      for (var i = 0; i < numbers.length; i++) {
+        if (Math.abs(target - numbers[i]) < Math.abs(target - closesN)) {
+          closesN = numbers[i];
+          index = i;
+        }
+      }
+      return index;
+    },
     //   滚动_物资
     scroll_goods_: function scroll_goods_(e) {
       var _this5 = this;
@@ -571,21 +615,15 @@ var _default = {
       clearTimeout(this.scroll_goods_timer);
       // 根据位置来定义shops_index
       this.scroll_goods_timer = setTimeout(function () {
-        var arr = _this5.placeOrder.goods.goods_li_arr;
-        var sum = 0;
-        // 遍历所有分类的高度，当高度大于滚动的高度时，就是当前的分类
-        for (var i = 0; i < arr.length; i++) {
-          sum += arr[i].height;
-          if (parseInt(top) < parseInt(sum)) {
-            // console.log(i)
-            _this5.shops_index = i;
-            break;
-          } else if (parseInt(top) === parseInt(sum)) {
-            _this5.shops_index = i + 1;
-            break;
-          }
-        }
-      }, 100);
+        // 遍历类标题名的top位置 是否接近标准值  如果接近 那就证明现在选择了这个类别
+
+        _this5.shop_class_title_query.boundingClientRect(function (arr) {
+          var tops = arr.map(function (e) {
+            return e.top;
+          });
+          _this5.shops_index = _this5.findClosestIndex(_this5.shop_class_title_start_top, tops);
+        }).exec();
+      }, 80);
     }
   })
 };

@@ -33,6 +33,7 @@ const {
 const {expressjwt: jwt} = require("express-jwt");
 //  导入跨域
 const cors = require('cors')
+const axios = require("axios");
 
 //  连接数据库
 {
@@ -41,7 +42,7 @@ const cors = require('cors')
         database: cfg.mysql_database.database,
         user: cfg.mysql_database.user,
         password: cfg.mysql_database.password,
-        timezone: "+8:00"
+        // timezone: "+8:00"
     })
 
     db.on('error', (err) => {
@@ -112,6 +113,29 @@ app.use((err, req, res, next) => {
 
 //  路由区
 {
+    // 骑手/商户 获取身份码
+    app.post('/get_invitation_code', async (req, res) => {
+        //     获取参数
+        const {code} = req.body
+        if (!code) return sendErr(res, '错误，参数丢失')
+        //     通过code去请求微信服务器来获取openid
+
+        const {data: result} = await axios.get('https://api.weixin.qq.com/sns/oauth2/access_token', {
+            params: {
+                appid: cfg.appid_official,
+                secret: cfg.secret_official,
+                code,
+                grant_type: 'authorization_code'
+            }
+        })
+        // 根据result的errcode判断是否成功
+        const {errcode, errmsg} = result
+        if (errcode) return sendErr(res, errmsg)
+
+        // 拿openid
+        const {openid} = result
+        sendRes(res, {invitation_code: openid})
+    })
 
     //  路由-my （包涵登陆）
     const router_my = require("./router/my");
@@ -145,53 +169,10 @@ app.use((err, req, res, next) => {
     app.use('/boss', verifyToken_official)
     app.use('/boss', router_boss)
 
-
-    // 测试
-    // app.use('/demo', async (req, res) => {
-    //     const {body} = req
-    //     console.log(body)
-    //     sendRes(res)
-    //
-    //     return
-    //     const result = await emit_subscribe_msg('ojBBU4zxPRGBKWdGrP-H-C9XYZLg', 'hR9kS4qotw-Fsdo_baENOE9kXpHVDU9En0TGsxHutyM', {
-    //         time2: {
-    //             value: formatTime(new Date())
-    //         },
-    //         thing3: {
-    //             value: '您的订单已处理完毕，请自提。',
-    //             color: "#ffdd02"
-    //         },
-    //         thing1: {value: "自提点：xx地方"}
-    //     }, 2)
-    //     res.send(result.msg)
-    // })
-
-    app.post('/demo', (req, res) => {
-        const form = new multiparty.Form({uploadDir: "temporary_files", maxFilesSize: 1024 * 1024 * 5})
-        form.parse(req, (err, fields, files) => {
-            if (err) return sendErr(res, '上传错误!' + err.message)
-            //     遍历files
-            Object.keys(files).forEach(key => {
-                const file = files[key][0]
-                const name = file.originalFilename
-                console.log(file, name, key)
-                const extend = name.split('.')[name.length - 1]
-                if (extend in ['jpg', 'png']) {
-
-                } else {
-
-                }
-                // 删除临时文件
-                fs.unlink(file.path, (err) => {
-                    if (err) return console.log('删除文件失败。')
-                })
-
-            })
-        })
-
-        // 保存文件逻辑...
-        res.send('上传成功！');
-    });
+    app.use('/get_service_fee', (req, res) => {
+        //  返回费用。
+        sendRes(res, cfg.service_fee)
+    })
 }
 
 // 使用的协议，如果0就是http协议 1为https

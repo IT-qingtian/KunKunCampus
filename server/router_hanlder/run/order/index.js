@@ -40,14 +40,15 @@ var public_js_1 = require("../../../function/public.js");
 //  获取订单
 var get_orders = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var openid, body, out_trade_no, is_my, d_user, user, sql, d_orders;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
+    var _a;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
             case 0:
                 openid = req.openid, body = req.body;
                 out_trade_no = body.out_trade_no, is_my = body.is_my;
                 return [4 /*yield*/, (0, public_js_1.db_query)('select * from users_run where openid=?', openid)];
             case 1:
-                d_user = _a.sent();
+                d_user = _b.sent();
                 if (!d_user.code)
                     return [2 /*return*/, (0, public_js_1.sendErr)(res, '获取用户信息失败' + d_user.err)];
                 if (d_user.data.length === 0)
@@ -60,10 +61,20 @@ var get_orders = function (req, res) { return __awaiter(void 0, void 0, void 0, 
                     ];
                 // 是查询自己的订单还是所有订单
                 if (is_my) {
-                    sql = "SELECT *  FROM orders  WHERE JSON_EXTRACT(receving_order_info, '$.delivery_info.openid') = '".concat(openid, "';");
+                    sql = "SELECT *  FROM orders  WHERE (type=3 and JSON_EXTRACT(receving_order_info, '$.delivery_info.openid') = '".concat(openid, "')");
+                    //     增加快递单条件
+                    sql += " or (type =1 and status = 1 and  JSON_EXTRACT(receving_order_info, '$.openid') = '".concat(openid, "')");
+                    // console.log(sql)
                 }
                 else {
-                    sql = "select * from orders where  (order_over=1 or order_over=2)  and status=1";
+                    // 要求，没人接单，并且 data里take_mode是0的数据
+                    // sql = `select * from orders where  (order_over=1 or order_over=2)  and status=1`
+                    // 可接单 + 已付款 + 派送 + 无人接单 + 非店家派送
+                    //  sql = `select * from orders where  (order_over=1 or order_over=2)  and status=1 and JSON_EXTRACT(data,'$.take_goods_mode') = 0 and JSON_EXTRACT(receving_order_info, '$.delivery_info') is null and JSON_EXTRACT(receving_order_info,'$.is_merchant_dispatch') != true`
+                    sql = "select * from orders where  (order_over=1 or order_over=2)  and status=1 and JSON_EXTRACT(data,'$.take_goods_mode') = 0 and JSON_EXTRACT(receving_order_info, '$.delivery_info') is null and (JSON_EXTRACT(receving_order_info,'$.is_merchant_dispatch') != true or JSON_EXTRACT(receving_order_info,'$.is_merchant_dispatch') is null)";
+                    //     增加快递单条件
+                    sql += ' or (type =1 and order_over=0 and status = 1)';
+                    // console.log(sql)
                 }
                 if (out_trade_no)
                     sql = "select * from orders where  status=1 and out_trade_no=".concat(out_trade_no);
@@ -71,7 +82,7 @@ var get_orders = function (req, res) { return __awaiter(void 0, void 0, void 0, 
                     // 空数据造成错误
                 ];
             case 2:
-                d_orders = _a.sent();
+                d_orders = _b.sent();
                 // 空数据造成错误
                 if (d_orders.eCode === 100 && !out_trade_no)
                     return [2 /*return*/, (0, public_js_1.sendRes)(res, [], '暂无订单')
@@ -84,13 +95,25 @@ var get_orders = function (req, res) { return __awaiter(void 0, void 0, void 0, 
                         return [2 /*return*/, (0, public_js_1.sendErr)(res, '查询不到此订单')];
                     d_orders.data = d_orders.data[0];
                     //    订单是否已接单
-                    console.log(d_orders);
-                    if (d_orders.data.receving_order_info.delivery_info) {
-                        //     已接单 验证是否是自己
-                        return [2 /*return*/, d_orders.data.receving_order_info.delivery_info.openid === openid ? (0, public_js_1.sendRes)(res, d_orders.data) : (0, public_js_1.sendErr)(res, '非本人接单，无权查看！')];
+                    // console.log(d_orders)
+                    switch (d_orders.data.type) {
+                        case 1:
+                            //  快递单
+                            if (d_orders.data.order_over !== 0) {
+                                //  判定接单人是否是自己
+                                if (((_a = d_orders.data.receving_order_info) === null || _a === void 0 ? void 0 : _a.openid) !== openid)
+                                    return [2 /*return*/, (0, public_js_1.sendErr)(res, '无权限查看此订单！')];
+                            }
+                            break;
+                        case 3:
+                            //     派送单
+                            if (d_orders.data.receving_order_info.delivery_info) {
+                                //     已接单 验证是否是自己
+                                return [2 /*return*/, d_orders.data.receving_order_info.delivery_info.openid === openid ? (0, public_js_1.sendRes)(res, d_orders.data) : (0, public_js_1.sendErr)(res, '非本人接单，无权查看！')];
+                            }
                     }
                 }
-                console.log(sql);
+                // console.log(sql)
                 (0, public_js_1.sendRes)(res, d_orders.data);
                 return [2 /*return*/];
         }

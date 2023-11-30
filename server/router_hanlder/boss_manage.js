@@ -370,7 +370,29 @@ var update_shop_data = function (req, res) { return __awaiter(void 0, void 0, vo
                     ];
                 form = new multiparty.Form({ uploadDir: TEMPORORAY_ADDRESS.shop_show, maxFilesSize: 1024 * 1024 * 8 });
                 form.parse(req, function (err, fields, files) { return __awaiter(void 0, void 0, void 0, function () {
-                    var code, params, imgFiles, new_img_address, key, path_1, reserve_imgs, trade_time, title, notice, type, tags, phone_number, mbp, address, start_time, end_time, trade_state, ftbh, shop_id, r_shop, del, reserve, sql, p, update_shop;
+                    var code, params, imgFiles, new_img_address, key, path_1, reserve_imgs, 
+                    // 上班周天
+                    trade_time, 
+                    // 店铺名
+                    title, 
+                    // 公告
+                    notice, 
+                    // 类型
+                    type, 
+                    // 标签
+                    tags, 
+                    // 电话
+                    phone_number, 
+                    // 最低起送价
+                    mdp, 
+                    // 地址
+                    address, 
+                    // 上班时间
+                    start_time, 
+                    // 下班时间
+                    end_time, 
+                    // 店铺激活状态
+                    active, shop_id, r_shop, del, reserve, sql, p, update_shop;
                     return __generator(this, function (_a) {
                         switch (_a.label) {
                             case 0:
@@ -395,22 +417,21 @@ var update_shop_data = function (req, res) { return __awaiter(void 0, void 0, vo
                                     path_1 = imgFiles[key][0].path;
                                     new_img_address.push(path_1);
                                 }
-                                reserve_imgs = params.reserve_imgs, trade_time = params.trade_time, title = params.title, notice = params.notice, type = params.type, tags = params.tags, phone_number = params.phone_number, mbp = params.mbp, address = params.address, start_time = params.start_time, end_time = params.end_time, trade_state = params.trade_state, ftbh = params.ftbh;
-                                // 查看必要信息是否被填写
-                                mbp = Number(Number(mbp).toFixed(2));
-                                if (!(mbp > 0.1 && mbp < 99999))
-                                    return [2 /*return*/, sendErr(res, '错误的起送价格！')];
+                                reserve_imgs = params.reserve_imgs, trade_time = params.trade_time, title = params.title, notice = params.notice, type = params.type, tags = params.tags, phone_number = params.phone_number, mdp = params.mdp, address = params.address, start_time = params.start_time, end_time = params.end_time, active = params.active;
+                                // 查看必要信息是否被填写\
+                                mdp = Number(Number(mdp).toFixed(2));
+                                if (!(mdp > 0.1 && mdp < 99999))
+                                    return [2 /*return*/, sendErr(res, '请保证最低起送价在0.1~99999之间')];
                                 if (!title || !(title.length >= 2) && !(title.length <= 10))
                                     sendErr(res, '店铺名长度必须在2~10字符');
                                 if (!phone_number)
                                     sendErr(res, '必须留下电话号码');
-                                if (!address || address.length > 100)
+                                if (!address || address.length > 20)
                                     sendErr(res, '必须留下店铺位置，并且位置最多不超过100字');
-                                if (notice && notice.length > 300)
+                                if (notice && notice.length > 50)
                                     sendErr(res, '公告过长！');
-                                // 贴合周期时 必须保证全面化
-                                if (ftbh && (!start_time || !end_time || !trade_time))
-                                    sendErr(res, '必须填写好运营时间');
+                                if ((trade_time === null || trade_time === void 0 ? void 0 : trade_time.length) !== 7)
+                                    sendErr(res, "异常的工作时间");
                                 shop_id = result_users_boss.data[0].shop_id;
                                 return [4 /*yield*/, db_query("select * from shop where id = '".concat(shop_id, "'"))];
                             case 1:
@@ -430,7 +451,7 @@ var update_shop_data = function (req, res) { return __awaiter(void 0, void 0, vo
                                 });
                                 // 追加图片
                                 new_img_address.unshift.apply(new_img_address, reserve);
-                                sql = "UPDATE shop SET \n            title=?, \n            start_time=?, \n            end_time=?, \n            trade_time=?, \n            ftbh=?, \n            trade_state=?, \n            mbp=?, \n            tags=?, \n            type=?, \n            img_address=?, \n            phone_number=?, \n            address=?, \n            notice=?\n        WHERE id=".concat(shop_id);
+                                sql = "UPDATE shop SET \n            title=?, \n            start_time=?, \n            end_time=?, \n            trade_time=?, \n            active=?, \n            mdp=?, \n            tags=?, \n            type=?, \n            img_address=?, \n            phone_number=?, \n            address=?, \n            notice=?\n        WHERE id=".concat(shop_id);
                                 p = [
                                     // 标题
                                     title,
@@ -440,12 +461,10 @@ var update_shop_data = function (req, res) { return __awaiter(void 0, void 0, vo
                                     end_time,
                                     // 营业周期
                                     JSON.stringify(trade_time),
-                                    // 自动贴合营业周期
-                                    ftbh,
                                     // 营业状态
-                                    trade_state,
+                                    active,
                                     // 配送起步价
-                                    mbp,
+                                    mdp,
                                     // 标签
                                     JSON.stringify(tags),
                                     // 店铺类型

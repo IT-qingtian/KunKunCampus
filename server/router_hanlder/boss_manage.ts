@@ -253,31 +253,38 @@ const update_shop_data = async (req, res) => {
         // 信息解码
         let {
             reserve_imgs,
+            // 上班周天
             trade_time,
+            // 店铺名
             title,
+            // 公告
             notice,
+            // 类型
             type,
+            // 标签
             tags,
+            // 电话
             phone_number,
-            mbp,
+            // 最低起送价
+            mdp,
+            // 地址
             address,
+            // 上班时间
             start_time,
+            // 下班时间
             end_time,
-            trade_state,
-            ftbh,
+            // 店铺激活状态
+            active,
         } = params
 
-        // 查看必要信息是否被填写
-
-        mbp = Number(Number(mbp).toFixed(2))
-        if (!(mbp > 0.1 && mbp < 99999)) return sendErr(res, '错误的起送价格！')
+        // 查看必要信息是否被填写\
+        mdp = Number(Number(mdp).toFixed(2))
+        if (!(mdp > 0.1 && mdp < 99999)) return sendErr(res, '请保证最低起送价在0.1~99999之间')
         if (!title || !(title.length >= 2) && !(title.length <= 10)) sendErr(res, '店铺名长度必须在2~10字符')
         if (!phone_number) sendErr(res, '必须留下电话号码')
-        if (!address || address.length > 100) sendErr(res, '必须留下店铺位置，并且位置最多不超过100字')
-        if (notice && notice.length > 300) sendErr(res, '公告过长！')
-
-        // 贴合周期时 必须保证全面化
-        if (ftbh && (!start_time || !end_time || !trade_time)) sendErr(res, '必须填写好运营时间')
+        if (!address || address.length > 20) sendErr(res, '必须留下店铺位置，并且位置最多不超过100字')
+        if (notice && notice.length > 50) sendErr(res, '公告过长！')
+        if (trade_time?.length !== 7) sendErr(res, "异常的工作时间")
 
         // 从数据库里获取店铺信息
         const shop_id = result_users_boss.data[0].shop_id
@@ -304,9 +311,8 @@ const update_shop_data = async (req, res) => {
             start_time=?, 
             end_time=?, 
             trade_time=?, 
-            ftbh=?, 
-            trade_state=?, 
-            mbp=?, 
+            active=?, 
+            mdp=?, 
             tags=?, 
             type=?, 
             img_address=?, 
@@ -323,12 +329,10 @@ const update_shop_data = async (req, res) => {
             end_time,
             // 营业周期
             JSON.stringify(trade_time),
-            // 自动贴合营业周期
-            ftbh,
             // 营业状态
-            trade_state,
+            active,
             // 配送起步价
-            mbp,
+            mdp,
             // 标签
             JSON.stringify(tags),
             // 店铺类型

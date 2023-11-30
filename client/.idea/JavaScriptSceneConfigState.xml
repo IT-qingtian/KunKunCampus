@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="SmartInputJavaScriptSceneConfigState">
-    <option name="customChineseScenes" value="{&quot;capsLockState&quot;:false,&quot;code&quot;:&quot;text;trade_time[1]&amp;&amp;text;log(optionalParams);JSProperty(code,msg,text_);XmlTagText(div,span,view);div(class);input(type,ref,@input);u-notice-bar(text)&quot;,&quot;enable&quot;:true,&quot;languageType&quot;:&quot;CHINESE&quot;,&quot;name&quot;:&quot;自定义中文切换&quot;,&quot;tip&quot;:&quot;&quot;}" />
+    <option name="customChineseScenes" value="{&quot;capsLockState&quot;:false,&quot;code&quot;:&quot;text;trade_time[1]&amp;&amp;text;log(optionalParams);JSProperty(code,msg,text_,title,icon);XmlTagText(div,span,view);div(class);input(type,ref,@input);u-notice-bar(text);t_err(msg)&quot;,&quot;enable&quot;:true,&quot;languageType&quot;:&quot;CHINESE&quot;,&quot;name&quot;:&quot;自定义中文切换&quot;,&quot;tip&quot;:&quot;&quot;}" />
   </component>
 </project>

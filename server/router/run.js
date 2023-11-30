@@ -5,12 +5,13 @@ const router = express.Router();
 const {login, get_user_info} = require("../router_hanlder/run");
 
 // 抢单、获取订单
-const {grabbing, cancel, showKdOrder, showKdOrderOne, overOrder} = require("../router_hanlder/run_kd");
+const {grabbing, cancel, showKdOrder, showKdOrderOne, overOrder, update_state} = require("../router_hanlder/run_kd");
 
 const {receving, change_delivery_state} = require("../router_hanlder/run_supermarket");
 
 const {change_work_status} = require("../router_hanlder/run/user");
 const {get_orders} = require("../router_hanlder/run/order");
+
 
 // 登录
 router.post('/login', login)
@@ -21,6 +22,8 @@ router.post('/get_user_info', get_user_info)
 
 // 抢单
 router.post('/kd/grabbing', grabbing)
+
+router.post('/kd/update_state', update_state)
 
 //  取消订单
 router.post('/kd/cancel', cancel)
